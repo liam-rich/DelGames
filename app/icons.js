@@ -178,3 +178,52 @@ export function IconX(props) {
     </Svg>
   );
 }
+
+export function IconSkull(props) {
+  return (
+    <Svg {...props}>
+      <path d="M12 3.5c-4 0-7 2.9-7 6.8 0 2.3 1.1 4 2.6 5.2V18a1 1 0 0 0 1 1h1.2v1.6c0 .5.4.9 1 .9h2.4c.6 0 1-.4 1-.9V19H15a1 1 0 0 0 1-1v-2.5c1.5-1.2 2.6-2.9 2.6-5.2 0-3.9-3-6.8-6.6-6.8z" />
+      <circle cx="9.3" cy="10.5" r="1.3" fill="currentColor" stroke="none" />
+      <circle cx="14.7" cy="10.5" r="1.3" fill="currentColor" stroke="none" />
+      <path d="M11 13.2l-0.8 1.6h1.6z" fill="currentColor" stroke="none" />
+    </Svg>
+  );
+}
+
+export function IconClock(props) {
+  return (
+    <Svg {...props}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </Svg>
+  );
+}
+
+export function IconAlertTriangle(props) {
+  return (
+    <Svg {...props}>
+      <path d="M12 4.2l9 15.6H3z" />
+      <path d="M12 10v4" />
+      <circle cx="12" cy="16.7" r="0.6" fill="currentColor" stroke="none" />
+    </Svg>
+  );
+}
+
+export function IconBook(props) {
+  return (
+    <Svg {...props}>
+      <path d="M4 5.5c2-1 5-1 8 0v13c-3-1-6-1-8 0z" />
+      <path d="M20 5.5c-2-1-5-1-8 0v13c3-1 6-1 8 0z" />
+    </Svg>
+  );
+}
+
+export function IconFlask(props) {
+  return (
+    <Svg {...props}>
+      <path d="M10 3h4" />
+      <path d="M10.5 3v6l-4.8 8.3a1.6 1.6 0 0 0 1.4 2.4h9.8a1.6 1.6 0 0 0 1.4-2.4L13.5 9V3" />
+      <path d="M8 15h8" />
+    </Svg>
+  );
+}

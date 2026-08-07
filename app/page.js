@@ -18,7 +18,7 @@ const games = [
     description: "Two-player co-op version of Codenames.",
     color: "var(--pink)",
     Icon: IconSpy,
-    status: "soon",
+    status: "play",
   },
   {
     slug: "wavelength",
