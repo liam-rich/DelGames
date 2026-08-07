@@ -26,7 +26,7 @@ function scoreFor(diff) {
   return { points: 0, label: "Off the mark" };
 }
 
-function playerLabel(role) {
+export function playerLabel(role) {
   return role === "p1" ? "Player 1" : "Player 2";
 }
 
@@ -343,7 +343,7 @@ function BlankSlider({ value, onChange }) {
   );
 }
 
-function PlacingPhase({ placer, draftMark, setDraftMark, onConfirm }) {
+export function PlacingPhase({ placer, draftMark, setDraftMark, onConfirm }) {
   return (
     <section
       className="block"
@@ -369,7 +369,7 @@ function PlacingPhase({ placer, draftMark, setDraftMark, onConfirm }) {
   );
 }
 
-function EnterCategoryPhase({ guesser, roundIndex, leftLabel, setLeftLabel, rightLabel, setRightLabel, error, onSubmit, rounds }) {
+export function EnterCategoryPhase({ guesser, roundIndex, leftLabel, setLeftLabel, rightLabel, setRightLabel, error, onSubmit, rounds }) {
   return (
     <section>
       <div className="pill" style={{ background: "var(--panel)", color: "var(--ink)", fontWeight: 800, marginBottom: "1rem" }}>
@@ -422,7 +422,7 @@ function EnterCategoryPhase({ guesser, roundIndex, leftLabel, setLeftLabel, righ
   );
 }
 
-function EnterResponsePhase({ placer, secretMark, leftLabel, rightLabel, responseText, setResponseText, error, onSubmit, roundIndex }) {
+export function EnterResponsePhase({ placer, secretMark, leftLabel, rightLabel, responseText, setResponseText, error, onSubmit, roundIndex }) {
   return (
     <section>
       <div className="pill" style={{ background: "var(--panel)", color: "var(--ink)", fontWeight: 800, marginBottom: "1rem" }}>
@@ -493,7 +493,7 @@ function EnterResponsePhase({ placer, secretMark, leftLabel, rightLabel, respons
   );
 }
 
-function GuessingPhase({ guesser, rounds, guessMark, setGuessMark, onSubmit }) {
+export function GuessingPhase({ guesser, rounds, guessMark, setGuessMark, onSubmit }) {
   return (
     <section>
       <div className="pill" style={{ background: "var(--panel)", color: "var(--ink)", fontWeight: 800, marginBottom: "1rem" }}>
@@ -517,7 +517,7 @@ function GuessingPhase({ guesser, rounds, guessMark, setGuessMark, onSubmit }) {
   );
 }
 
-function RoundHistory({ rounds, expanded }) {
+export function RoundHistory({ rounds, expanded }) {
   if (rounds.length === 0) return null;
   return (
     <div className="block" style={{ padding: "1rem 1.2rem", color: "var(--ink)", marginTop: expanded ? 0 : "1.2rem" }}>
@@ -554,7 +554,7 @@ function RoundHistory({ rounds, expanded }) {
   );
 }
 
-function RevealPhase({ placer, guesser, secretMark, guessMark, result, rounds, onReplay }) {
+export function RevealPhase({ placer, guesser, secretMark, guessMark, result, rounds, onReplay }) {
   return (
     <section
       className="block"
