@@ -298,7 +298,7 @@ export default function CodenamesDuetGame() {
   );
 }
 
-function BriefingPhase({ onStart }) {
+export function BriefingPhase({ onStart }) {
   return (
     <section
       className="block"
@@ -381,7 +381,7 @@ function HandoffPhase({ heading, body, buttonLabel, onReady }) {
   );
 }
 
-function Legend({ variant }) {
+export function Legend({ variant }) {
   // variant: 'key' shows agent/bystander/assassin (for the clue-giver's private view)
   // variant: 'public' shows the same three, used for revealed-tile meaning
   return (
@@ -405,7 +405,7 @@ function LegendItem({ color, textColor = "var(--ink)", Icon, label }) {
   );
 }
 
-function BoardGrid({ words, revealed, keyView, clickable, onClickTile }) {
+export function BoardGrid({ words, revealed, keyView, clickable, onClickTile }) {
   return (
     <div
       style={{
@@ -489,7 +489,7 @@ function BoardGrid({ words, revealed, keyView, clickable, onClickTile }) {
   );
 }
 
-function ClueHistory({ clueLog }) {
+export function ClueHistory({ clueLog }) {
   if (clueLog.length === 0) return null;
   return (
     <div className="block" style={{ padding: "0.9rem 1rem", color: "var(--ink)", marginTop: "1.2rem" }}>
@@ -517,7 +517,7 @@ function ClueHistory({ clueLog }) {
   );
 }
 
-function GiveCluePhase({ giver, game, clueWord, setClueWord, clueNumber, setClueNumber, error, onSubmit, clueLog }) {
+export function GiveCluePhase({ giver, game, clueWord, setClueWord, clueNumber, setClueNumber, error, onSubmit, clueLog }) {
   const key = giver === "p1" ? game.keyP1 : game.keyP2;
   return (
     <section>
@@ -578,7 +578,7 @@ function GiveCluePhase({ giver, game, clueWord, setClueWord, clueNumber, setClue
   );
 }
 
-function GuessPhase({ guesser, game, activeClue, guessesLeft, guessFeedback, onGuess, onStop, clueLog }) {
+export function GuessPhase({ guesser, game, activeClue, guessesLeft, guessFeedback, onGuess, onStop, clueLog }) {
   return (
     <section>
       <div
@@ -647,7 +647,7 @@ function GuessPhase({ guesser, game, activeClue, guessesLeft, guessFeedback, onG
   );
 }
 
-function ResultsPhase({ outcome, game, agentsFound, onReplay }) {
+export function ResultsPhase({ outcome, game, agentsFound, onReplay }) {
   const won = outcome?.result === "won";
   const reasonText =
     outcome?.reason === "assassin"
