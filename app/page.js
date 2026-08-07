@@ -22,12 +22,12 @@ const games = [
   },
   {
     slug: "wavelength",
-    title: "Dial It In",
+    title: "Category Scales",
     tagline: "Wavelength-style",
-    description: "Wavelength-style dial guessing game.",
+    description: "One of you secretly marks a scale; the other invents categories and guesses where the mark is.",
     color: "var(--purple)",
     Icon: IconRadio,
-    status: "soon",
+    status: "play",
   },
 ];
 
