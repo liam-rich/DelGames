@@ -290,7 +290,7 @@ export default function WordStreakGame() {
   );
 }
 
-function SetupPhase({ playerLabel, PlayerIcon, words, updateWord, onSubmit, error, theme }) {
+export function SetupPhase({ playerLabel, PlayerIcon, words, updateWord, onSubmit, error, theme }) {
   return (
     <section>
       <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
@@ -538,7 +538,7 @@ function PlayPhase({
   );
 }
 
-function ChainProgress({ label, active, finished, words, targetIndex, revealed }) {
+export function ChainProgress({ label, active, finished, words, targetIndex, revealed }) {
   return (
     <div
       className="pill"
@@ -593,7 +593,7 @@ function ChainProgress({ label, active, finished, words, targetIndex, revealed }
   );
 }
 
-function ResultsPhase({ finishOrder, wins, onReplay }) {
+export function ResultsPhase({ finishOrder, wins, onReplay }) {
   const winnerLabel = finishOrder[0] === "p1" ? "Player 1" : "Player 2";
   const runnerUpLabel = finishOrder[1] === "p1" ? "Player 1" : "Player 2";
   return (

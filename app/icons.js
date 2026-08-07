@@ -227,3 +227,32 @@ export function IconFlask(props) {
     </Svg>
   );
 }
+
+export function IconSmartphone(props) {
+  return (
+    <Svg {...props}>
+      <rect x="6.5" y="2.5" width="11" height="19" rx="2.2" />
+      <path d="M11 18.3h2" />
+    </Svg>
+  );
+}
+
+export function IconCopy(props) {
+  return (
+    <Svg {...props}>
+      <rect x="8.5" y="8.5" width="12" height="12" rx="2" />
+      <path d="M15.5 8.5V5.5A2 2 0 0 0 13.5 3.5H5.5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3" />
+    </Svg>
+  );
+}
+
+export function IconWifi(props) {
+  return (
+    <Svg {...props}>
+      <path d="M4 9.5a12 12 0 0 1 16 0" />
+      <path d="M7 13a8 8 0 0 1 10 0" />
+      <path d="M10 16.5a4 4 0 0 1 4 0" />
+      <circle cx="12" cy="19.5" r="0.8" fill="currentColor" stroke="none" />
+    </Svg>
+  );
+}
