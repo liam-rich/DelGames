@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { IconDice, IconHeart, IconLink, IconSpy, IconRadio, IconWrench, IconArrowRight } from "./icons";
+import { IconDice, IconLink, IconSpy, IconRadio, IconWrench, IconArrowRight } from "./icons";
 
 const games = [
   {
     slug: "word-streak",
     title: "Word Streak",
     tagline: "Chain",
-    description:
-      "Both of you build a secret 5-word chain. Race to guess each other's words first — reveal a letter or take a shot.",
+    description: "Guess your opponent's 5-word chain before they guess yours.",
     color: "var(--teal)",
     Icon: IconLink,
     status: "play",
@@ -16,8 +15,7 @@ const games = [
     slug: "codenames-duet",
     title: "Codenames Duet",
     tagline: "Co-op word spies",
-    description:
-      "Two secret grids, one shared board. Give clues, find your agents, and avoid the assassin — together.",
+    description: "Two-player co-op version of Codenames.",
     color: "var(--pink)",
     Icon: IconSpy,
     status: "soon",
@@ -26,8 +24,7 @@ const games = [
     slug: "wavelength",
     title: "Dial It In",
     tagline: "Wavelength-style",
-    description:
-      "One of you sets a secret spot on the dial and gives a category. The other tries to land the needle.",
+    description: "Wavelength-style dial guessing game.",
     color: "var(--purple)",
     Icon: IconRadio,
     status: "soon",
@@ -44,23 +41,9 @@ export default function Home() {
           </span>
           DelGames
         </div>
-        <span className="pill">
-          <IconHeart size={15} strokeWidth={2.4} />
-          for two
-        </span>
       </nav>
 
       <main className="page">
-        <header style={{ marginBottom: "2.5rem" }}>
-          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.2rem)" }}>
-            Puzzle night, all in one place.
-          </h1>
-          <p style={{ marginTop: "0.8rem", fontSize: "1.15rem", maxWidth: 560, opacity: 0.85 }}>
-            The games we keep coming back to — bundled up, colorful, and ready
-            whenever you are.
-          </p>
-        </header>
-
         <section
           style={{
             display: "grid",
@@ -72,10 +55,6 @@ export default function Home() {
             <GameCard key={game.slug} game={game} />
           ))}
         </section>
-
-        <footer style={{ marginTop: "3.5rem", opacity: 0.6, fontSize: "0.9rem" }}>
-          More games get added when we get hooked on something new.
-        </footer>
       </main>
     </>
   );
