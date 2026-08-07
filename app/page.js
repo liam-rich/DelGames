@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconDice, IconHeart, IconLink, IconSpy, IconRadio, IconWrench, IconArrowRight } from "./icons";
 
 const games = [
   {
@@ -6,9 +7,9 @@ const games = [
     title: "Word Streak",
     tagline: "Chain",
     description:
-      "One of you builds a 5-word chain. The other guesses each word letter by letter — reveal a letter or take a shot.",
+      "Both of you build a secret 5-word chain. Race to guess each other's words first — reveal a letter or take a shot.",
     color: "var(--teal)",
-    emoji: "🔗",
+    Icon: IconLink,
     status: "play",
   },
   {
@@ -18,7 +19,7 @@ const games = [
     description:
       "Two secret grids, one shared board. Give clues, find your agents, and avoid the assassin — together.",
     color: "var(--pink)",
-    emoji: "🕵️",
+    Icon: IconSpy,
     status: "soon",
   },
   {
@@ -28,7 +29,7 @@ const games = [
     description:
       "One of you sets a secret spot on the dial and gives a category. The other tries to land the needle.",
     color: "var(--purple)",
-    emoji: "📡",
+    Icon: IconRadio,
     status: "soon",
   },
 ];
@@ -38,10 +39,15 @@ export default function Home() {
     <>
       <nav className="top-nav">
         <div className="brand">
-          <span className="brand-badge">🎲</span>
+          <span className="brand-badge">
+            <IconDice size={20} strokeWidth={2.2} />
+          </span>
           DelGames
         </div>
-        <span className="pill">for two 💛</span>
+        <span className="pill">
+          <IconHeart size={15} strokeWidth={2.4} />
+          for two
+        </span>
       </nav>
 
       <main className="page">
@@ -76,6 +82,7 @@ export default function Home() {
 }
 
 function GameCard({ game }) {
+  const { Icon } = game;
   const content = (
     <div
       className="block"
@@ -99,10 +106,9 @@ function GameCard({ game }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "1.6rem",
         }}
       >
-        {game.emoji}
+        <Icon size={24} strokeWidth={2.2} />
       </div>
 
       <div>
@@ -121,7 +127,17 @@ function GameCard({ game }) {
           background: game.status === "play" ? "var(--green)" : "var(--panel)",
         }}
       >
-        {game.status === "play" ? "▶ Play now" : "🛠 Coming soon"}
+        {game.status === "play" ? (
+          <>
+            <IconArrowRight size={14} strokeWidth={2.5} />
+            Play now
+          </>
+        ) : (
+          <>
+            <IconWrench size={14} strokeWidth={2.5} />
+            Coming soon
+          </>
+        )}
       </span>
     </div>
   );

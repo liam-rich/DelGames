@@ -2,176 +2,286 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import {
+  IconDice,
+  IconLink,
+  IconUser,
+  IconUsers,
+  IconArrowRight,
+  IconEye,
+  IconTarget,
+  IconLock,
+  IconTrophy,
+  IconRefresh,
+} from "../icons";
 
 const WORD_COUNT = 5;
-const WORD_COLORS = ["var(--pink)", "var(--orange)", "var(--yellow)", "var(--teal)", "var(--blue)"];
+
+const P1_THEME = { bg: "var(--blue)", text: "var(--paper)", name: "Player 1" };
+const P2_THEME = { bg: "var(--pink)", text: "var(--ink)", name: "Player 2" };
+const NEUTRAL_THEME = { bg: "var(--paper)", text: "var(--ink)", name: "" };
 
 function emptyWords() {
   return Array.from({ length: WORD_COUNT }, () => "");
 }
 
-function emptyStats() {
-  return Array.from({ length: WORD_COUNT }, () => ({ reveals: 0, misses: 0 }));
-}
-
 export default function WordStreakGame() {
-  const [phase, setPhase] = useState("setup"); // setup -> handoff -> play -> results
-  const [words, setWords] = useState(emptyWords());
+  const [phase, setPhase] = useState("setup-p1");
+  // setup-p1 -> handoff-1 -> setup-p2 -> handoff-2 -> play -> results
+
+  const [p1Words, setP1Words] = useState(emptyWords()); // Player 1's secret chain (Player 2 guesses this)
+  const [p2Words, setP2Words] = useState(emptyWords()); // Player 2's secret chain (Player 1 guesses this)
   const [setupError, setSetupError] = useState("");
 
-  const [wordIndex, setWordIndex] = useState(1); // guesser starts on word 2 (index 1); word 0 is given
-  const [revealedCount, setRevealedCount] = useState(1); // letters revealed for current word, starts at 1 (first letter)
+  const [currentTurn, setCurrentTurn] = useState("p1");
+  const [p1TargetIndex, setP1TargetIndex] = useState(1); // word in p2Words that Player 1 is chasing
+  const [p2TargetIndex, setP2TargetIndex] = useState(1); // word in p1Words that Player 2 is chasing
+  const [p1Revealed, setP1Revealed] = useState(1);
+  const [p2Revealed, setP2Revealed] = useState(1);
   const [guessInput, setGuessInput] = useState("");
-  const [feedback, setFeedback] = useState(null); // { type: 'wrong' | 'correct' }
-  const [stats, setStats] = useState(emptyStats());
+  const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
+  const [winner, setWinner] = useState(null);
 
-  const currentWord = words[wordIndex] || "";
-  const isLastLetterLeft = currentWord.length - revealedCount <= 1;
-
-  function updateWord(i, value) {
+  function updateWord(setter, i, value) {
     const clean = value.replace(/[^a-zA-Z]/g, "").toLowerCase();
-    setWords((prev) => {
+    setter((prev) => {
       const next = [...prev];
       next[i] = clean;
       return next;
     });
   }
 
-  function startPlay() {
+  function validate(words) {
     for (let i = 0; i < WORD_COUNT; i++) {
       if (!words[i] || words[i].trim().length < 1) {
-        setSetupError(`Word ${i + 1} needs at least one letter.`);
-        return;
+        return `Word ${i + 1} needs at least one letter.`;
       }
     }
-    setSetupError("");
-    setPhase("handoff");
+    return "";
   }
 
-  function beginGuessing() {
-    setWordIndex(1);
-    setRevealedCount(1);
+  function submitP1Setup() {
+    const err = validate(p1Words);
+    if (err) {
+      setSetupError(err);
+      return;
+    }
+    setSetupError("");
+    setPhase("handoff-1");
+  }
+
+  function submitP2Setup() {
+    const err = validate(p2Words);
+    if (err) {
+      setSetupError(err);
+      return;
+    }
+    setSetupError("");
+    setPhase("handoff-2");
+  }
+
+  function beginPlay() {
+    setCurrentTurn("p1");
+    setP1TargetIndex(1);
+    setP2TargetIndex(1);
+    setP1Revealed(1);
+    setP2Revealed(1);
     setGuessInput("");
     setFeedback(null);
-    setStats(emptyStats());
+    setWinner(null);
     setPhase("play");
   }
+
+  function resetAll() {
+    setP1Words(emptyWords());
+    setP2Words(emptyWords());
+    setSetupError("");
+    setCurrentTurn("p1");
+    setP1TargetIndex(1);
+    setP2TargetIndex(1);
+    setP1Revealed(1);
+    setP2Revealed(1);
+    setGuessInput("");
+    setFeedback(null);
+    setWinner(null);
+    setPhase("setup-p1");
+  }
+
+  const activeTargetWords = currentTurn === "p1" ? p2Words : p1Words;
+  const activeTargetIndex = currentTurn === "p1" ? p1TargetIndex : p2TargetIndex;
+  const activeRevealed = currentTurn === "p1" ? p1Revealed : p2Revealed;
+  const currentWord = activeTargetWords[activeTargetIndex] || "";
+  const canReveal = currentWord.length - activeRevealed > 1;
 
   function submitGuess(e) {
     e.preventDefault();
     const guess = guessInput.trim().toLowerCase();
     if (!guess) return;
 
+    const setTargetIndex = currentTurn === "p1" ? setP1TargetIndex : setP2TargetIndex;
+    const setRevealed = currentTurn === "p1" ? setP1Revealed : setP2Revealed;
+
     if (guess === currentWord) {
-      setFeedback({ type: "correct" });
       setGuessInput("");
-      if (wordIndex === WORD_COUNT - 1) {
-        setTimeout(() => setPhase("results"), 500);
+      if (activeTargetIndex === WORD_COUNT - 1) {
+        setFeedback("correct");
+        setWinner(currentTurn);
+        setTimeout(() => setPhase("results"), 700);
       } else {
+        setFeedback("correct");
         setTimeout(() => {
-          setWordIndex((i) => i + 1);
-          setRevealedCount(1);
+          setTargetIndex((i) => i + 1);
+          setRevealed(1);
           setFeedback(null);
         }, 500);
       }
     } else {
-      setStats((prev) => {
-        const next = prev.map((s) => ({ ...s }));
-        next[wordIndex].misses += 1;
-        return next;
-      });
-      setFeedback({ type: "wrong" });
+      setFeedback("wrong");
       setGuessInput("");
+      setTimeout(() => {
+        setFeedback(null);
+        setCurrentTurn((t) => (t === "p1" ? "p2" : "p1"));
+      }, 650);
     }
   }
 
   function revealLetter() {
-    if (isLastLetterLeft) return;
-    setStats((prev) => {
-      const next = prev.map((s) => ({ ...s }));
-      next[wordIndex].reveals += 1;
-      return next;
-    });
-    setRevealedCount((c) => Math.min(c + 1, currentWord.length));
+    if (!canReveal) return;
+    const setRevealed = currentTurn === "p1" ? setP1Revealed : setP2Revealed;
+    setRevealed((c) => Math.min(c + 1, currentWord.length));
     setFeedback(null);
-  }
-
-  function resetAll() {
-    setWords(emptyWords());
-    setStats(emptyStats());
-    setWordIndex(1);
-    setRevealedCount(1);
-    setGuessInput("");
-    setFeedback(null);
-    setSetupError("");
-    setPhase("setup");
+    setTimeout(() => {
+      setCurrentTurn((t) => (t === "p1" ? "p2" : "p1"));
+    }, 400);
   }
 
   const displayPattern = useMemo(() => {
     if (!currentWord) return "";
     return currentWord
+      .slice(0, activeRevealed)
+      .toUpperCase()
       .split("")
-      .map((ch, i) => (i < revealedCount ? ch.toUpperCase() : "_"))
       .join(" ");
-  }, [currentWord, revealedCount]);
+  }, [currentWord, activeRevealed]);
+
+  let theme = NEUTRAL_THEME;
+  if (phase === "setup-p1") theme = P1_THEME;
+  else if (phase === "setup-p2") theme = P2_THEME;
+  else if (phase === "play") theme = currentTurn === "p1" ? P1_THEME : P2_THEME;
+  else if (phase === "results") theme = winner === "p1" ? P1_THEME : P2_THEME;
 
   return (
-    <>
-      <nav className="top-nav">
-        <Link href="/" className="brand" style={{ textDecoration: "none" }}>
-          <span className="brand-badge">🎲</span>
+    <div style={{ minHeight: "100vh", background: theme.bg, transition: "background 0.25s ease" }}>
+      <nav className="top-nav" style={{ color: theme.text }}>
+        <Link href="/" className="brand" style={{ textDecoration: "none", color: theme.text }}>
+          <span className="brand-badge">
+            <IconDice size={20} strokeWidth={2.2} />
+          </span>
           DelGames
         </Link>
-        <span className="pill" style={{ background: "var(--teal)" }}>
-          🔗 Word Streak
+        <span
+          className="pill"
+          style={{ background: "var(--panel)", color: "var(--ink)" }}
+        >
+          <IconLink size={14} strokeWidth={2.4} />
+          Word Streak
         </span>
       </nav>
 
-      <main className="page" style={{ maxWidth: 640 }}>
-        {phase === "setup" && (
+      <main className="page" style={{ maxWidth: 640, color: theme.text }}>
+        {phase === "setup-p1" && (
           <SetupPhase
-            words={words}
-            updateWord={updateWord}
-            onSubmit={startPlay}
+            playerLabel="Player 1"
+            PlayerIcon={IconUser}
+            words={p1Words}
+            updateWord={(i, v) => updateWord(setP1Words, i, v)}
+            onSubmit={submitP1Setup}
             error={setupError}
+            theme={theme}
           />
         )}
 
-        {phase === "handoff" && (
-          <HandoffPhase firstWord={words[0]} onReady={beginGuessing} />
+        {phase === "handoff-1" && (
+          <HandoffPhase
+            heading="Player 1's chain is locked in"
+            body="Pass the device to Player 2. Build your own secret 5-word chain — Player 1 won't see it."
+            buttonLabel="I'm Player 2"
+            onReady={() => setPhase("setup-p2")}
+          />
+        )}
+
+        {phase === "setup-p2" && (
+          <SetupPhase
+            playerLabel="Player 2"
+            PlayerIcon={IconUser}
+            words={p2Words}
+            updateWord={(i, v) => updateWord(setP2Words, i, v)}
+            onSubmit={submitP2Setup}
+            error={setupError}
+            theme={theme}
+          />
+        )}
+
+        {phase === "handoff-2" && (
+          <HandoffPhase
+            heading="Both chains are set"
+            body="Player 1 goes first — guess Player 2's opening word, then race down each other's chains. Wrong guess passes the turn. Revealing a letter passes the turn too."
+            buttonLabel="Start the race"
+            onReady={beginPlay}
+          />
         )}
 
         {phase === "play" && (
           <PlayPhase
-            words={words}
-            wordIndex={wordIndex}
+            theme={theme}
+            currentTurn={currentTurn}
+            p1TargetIndex={p1TargetIndex}
+            p2TargetIndex={p2TargetIndex}
+            activeTargetWords={activeTargetWords}
+            activeTargetIndex={activeTargetIndex}
             displayPattern={displayPattern}
             guessInput={guessInput}
             setGuessInput={setGuessInput}
             onGuess={submitGuess}
             onReveal={revealLetter}
-            canReveal={!isLastLetterLeft}
+            canReveal={canReveal}
             feedback={feedback}
           />
         )}
 
         {phase === "results" && (
-          <ResultsPhase words={words} stats={stats} onReplay={resetAll} />
+          <ResultsPhase theme={theme} winner={winner} onReplay={resetAll} />
         )}
       </main>
-    </>
+    </div>
   );
 }
 
-function SetupPhase({ words, updateWord, onSubmit, error }) {
+function SetupPhase({ playerLabel, PlayerIcon, words, updateWord, onSubmit, error, theme }) {
   return (
     <section>
-      <h1 style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>Build your chain 🔗</h1>
-      <p style={{ opacity: 0.8, marginBottom: "1.5rem", lineHeight: 1.5 }}>
-        Player 1: think of 5 words where each one connects to the next (like{" "}
-        <em>home → work → out → side → men</em>). Your partner will only see
-        the first word and the first letters of the rest — they'll guess or
-        reveal letters to work through the chain.
+      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
+        <span
+          style={{
+            width: "2.6rem",
+            height: "2.6rem",
+            borderRadius: "12px",
+            border: "var(--border-w) solid var(--ink)",
+            background: "var(--panel)",
+            color: "var(--ink)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <PlayerIcon size={20} strokeWidth={2.2} />
+        </span>
+        <h1 style={{ fontSize: "1.8rem" }}>{playerLabel}: build your chain</h1>
+      </div>
+      <p style={{ opacity: 0.9, marginBottom: "1.5rem", lineHeight: 1.5 }}>
+        Think of 5 words where each one connects to the next (like{" "}
+        <em>home → work → out → side → men</em>). Your opponent will race to
+        guess these — keep the device away from their eyes.
       </p>
 
       <form
@@ -186,7 +296,8 @@ function SetupPhase({ words, updateWord, onSubmit, error }) {
             <div
               className="pill"
               style={{
-                background: WORD_COLORS[i],
+                background: "var(--panel)",
+                color: "var(--ink)",
                 minWidth: "2.2rem",
                 justifyContent: "center",
                 padding: "0.3rem 0.6rem",
@@ -206,18 +317,21 @@ function SetupPhase({ words, updateWord, onSubmit, error }) {
         ))}
 
         {error && (
-          <p style={{ color: "var(--red)", fontWeight: 700 }}>{error}</p>
+          <p style={{ color: "var(--ink)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 10, fontWeight: 700, border: "var(--border-w) solid var(--ink)" }}>
+            {error}
+          </p>
         )}
 
-        <button type="submit" className="block-btn pink" style={{ marginTop: "0.6rem" }}>
-          Lock it in →
+        <button type="submit" className="block-btn" style={{ marginTop: "0.6rem", background: "var(--panel)" }}>
+          Lock it in
+          <IconArrowRight size={16} strokeWidth={2.4} style={{ marginLeft: "0.5rem", verticalAlign: "-2px" }} />
         </button>
       </form>
     </section>
   );
 }
 
-function HandoffPhase({ firstWord, onReady }) {
+function HandoffPhase({ heading, body, buttonLabel, onReady }) {
   return (
     <section
       className="block"
@@ -228,25 +342,40 @@ function HandoffPhase({ firstWord, onReady }) {
         flexDirection: "column",
         gap: "1.2rem",
         alignItems: "center",
+        color: "var(--ink)",
       }}
     >
-      <div style={{ fontSize: "2.5rem" }}>🤫</div>
-      <h1 style={{ fontSize: "1.6rem" }}>Chain locked in!</h1>
-      <p style={{ opacity: 0.8, maxWidth: 420 }}>
-        Pass the device to Player 2. They'll see the first word,{" "}
-        <strong>{firstWord.toUpperCase()}</strong>, plus the first letter of
-        every word after it — then guess or reveal their way down the chain.
-      </p>
+      <span
+        style={{
+          width: "3.4rem",
+          height: "3.4rem",
+          borderRadius: "14px",
+          border: "var(--border-w) solid var(--ink)",
+          background: "var(--yellow)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <IconUsers size={24} strokeWidth={2.2} />
+      </span>
+      <h1 style={{ fontSize: "1.6rem" }}>{heading}</h1>
+      <p style={{ opacity: 0.8, maxWidth: 440 }}>{body}</p>
       <button className="block-btn teal" onClick={onReady}>
-        I'm Player 2, let's go →
+        {buttonLabel}
+        <IconArrowRight size={16} strokeWidth={2.4} style={{ marginLeft: "0.5rem", verticalAlign: "-2px" }} />
       </button>
     </section>
   );
 }
 
 function PlayPhase({
-  words,
-  wordIndex,
+  theme,
+  currentTurn,
+  p1TargetIndex,
+  p2TargetIndex,
+  activeTargetWords,
+  activeTargetIndex,
   displayPattern,
   guessInput,
   setGuessInput,
@@ -255,22 +384,45 @@ function PlayPhase({
   canReveal,
   feedback,
 }) {
+  const p1Solved = p1TargetIndex - 1;
+  const p2Solved = p2TargetIndex - 1;
+
   return (
     <section>
+      {/* scoreboard */}
+      <div style={{ display: "flex", gap: "0.8rem", marginBottom: "1.6rem" }}>
+        <ScorePill label="Player 1" solved={p1Solved} total={WORD_COUNT - 1} active={currentTurn === "p1"} />
+        <ScorePill label="Player 2" solved={p2Solved} total={WORD_COUNT - 1} active={currentTurn === "p2"} />
+      </div>
+
+      <div
+        className="pill"
+        style={{
+          background: "var(--panel)",
+          color: "var(--ink)",
+          marginBottom: "1.2rem",
+          fontWeight: 800,
+        }}
+      >
+        <IconTarget size={15} strokeWidth={2.4} />
+        {currentTurn === "p1" ? "Player 1" : "Player 2"}'s turn — guessing the other chain
+      </div>
+
+      {/* chain progress row: only shows given word + first letters, never lengths */}
       <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.8rem", flexWrap: "wrap" }}>
-        {words.map((w, i) => {
-          const solved = i < wordIndex;
-          const active = i === wordIndex;
+        {activeTargetWords.map((w, i) => {
+          const solved = i < activeTargetIndex;
+          const active = i === activeTargetIndex;
           const given = i === 0;
           return (
             <div
               key={i}
               className="pill"
               style={{
-                background: solved || given ? WORD_COLORS[i] : "var(--panel)",
-                borderStyle: active ? "solid" : "solid",
+                background: solved || given ? "var(--panel)" : "rgba(255,255,255,0.35)",
+                color: "var(--ink)",
                 fontWeight: 800,
-                opacity: active ? 1 : solved || given ? 0.9 : 0.5,
+                opacity: active ? 1 : 0.85,
                 boxShadow: active ? "3px 3px 0 var(--ink)" : "none",
               }}
             >
@@ -289,28 +441,26 @@ function PlayPhase({
           flexDirection: "column",
           gap: "1.4rem",
           alignItems: "center",
+          color: "var(--ink)",
         }}
       >
-        <span style={{ fontWeight: 700, opacity: 0.6 }}>
-          Word {wordIndex + 1} of {words.length}
-        </span>
-
         <div
           style={{
             fontSize: "clamp(1.8rem, 6vw, 2.6rem)",
             fontWeight: 800,
             letterSpacing: "0.12em",
+            minHeight: "3rem",
           }}
         >
           {displayPattern}
         </div>
 
-        {feedback?.type === "wrong" && (
-          <p style={{ color: "var(--red)", fontWeight: 700 }}>Not quite — try again!</p>
+        {feedback === "wrong" && (
+          <p style={{ color: "var(--red)", fontWeight: 700 }}>Not quite — turn passes.</p>
         )}
-        {feedback?.type === "correct" && (
-          <p style={{ color: "var(--green)", fontWeight: 800, fontSize: "1.2rem" }}>
-            Got it! 🎉
+        {feedback === "correct" && (
+          <p style={{ color: "var(--green)", fontWeight: 800, fontSize: "1.2rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+            Got it!
           </p>
         )}
 
@@ -334,18 +484,49 @@ function PlayPhase({
           onClick={onReveal}
           disabled={!canReveal}
         >
-          {canReveal ? "Reveal a letter 🔍" : "One letter left — take the guess!"}
+          {canReveal ? (
+            <>
+              <IconEye size={16} strokeWidth={2.4} style={{ marginRight: "0.4rem", verticalAlign: "-3px" }} />
+              Reveal a letter (ends turn)
+            </>
+          ) : (
+            <>
+              <IconLock size={16} strokeWidth={2.4} style={{ marginRight: "0.4rem", verticalAlign: "-3px" }} />
+              No hints left — take the guess
+            </>
+          )}
         </button>
       </div>
     </section>
   );
 }
 
-function ResultsPhase({ words, stats, onReplay }) {
-  const totalReveals = stats.slice(1).reduce((sum, s) => sum + s.reveals, 0);
-  const totalMisses = stats.slice(1).reduce((sum, s) => sum + s.misses, 0);
-  const perfectWords = stats.slice(1).filter((s) => s.reveals === 0 && s.misses === 0).length;
+function ScorePill({ label, solved, total, active }) {
+  return (
+    <div
+      className="pill"
+      style={{
+        flex: 1,
+        justifyContent: "space-between",
+        background: active ? "var(--panel)" : "rgba(255,255,255,0.3)",
+        color: "var(--ink)",
+        fontWeight: 800,
+        boxShadow: active ? "3px 3px 0 var(--ink)" : "none",
+      }}
+    >
+      <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+        <IconUser size={14} strokeWidth={2.4} />
+        {label}
+      </span>
+      <span>
+        {solved}/{total}
+      </span>
+    </div>
+  );
+}
 
+function ResultsPhase({ theme, winner, onReplay }) {
+  const label = winner === "p1" ? "Player 1" : "Player 2";
   return (
     <section
       className="block"
@@ -356,45 +537,32 @@ function ResultsPhase({ words, stats, onReplay }) {
         flexDirection: "column",
         gap: "1.4rem",
         alignItems: "center",
+        color: "var(--ink)",
       }}
     >
-      <div style={{ fontSize: "2.5rem" }}>🏁</div>
-      <h1 style={{ fontSize: "1.8rem" }}>Chain complete!</h1>
-
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
-        {words.map((w, i) => (
-          <span key={i} className="pill" style={{ background: WORD_COLORS[i], fontWeight: 800 }}>
-            {w.toUpperCase()}
-          </span>
-        ))}
-      </div>
-
-      <div
+      <span
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "0.8rem",
-          width: "100%",
-          maxWidth: 420,
+          width: "3.6rem",
+          height: "3.6rem",
+          borderRadius: "14px",
+          border: "var(--border-w) solid var(--ink)",
+          background: "var(--yellow)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <StatBlock label="Perfect words" value={`${perfectWords}/4`} color="var(--green)" />
-        <StatBlock label="Letters revealed" value={totalReveals} color="var(--yellow)" />
-        <StatBlock label="Wrong guesses" value={totalMisses} color="var(--pink)" />
-      </div>
+        <IconTrophy size={26} strokeWidth={2.2} />
+      </span>
+      <h1 style={{ fontSize: "1.8rem" }}>{label} wins the chain race!</h1>
+      <p style={{ opacity: 0.75 }}>
+        They guessed their opponent's whole 5-word chain first.
+      </p>
 
       <button className="block-btn purple" onClick={onReplay}>
-        Play again ↻
+        <IconRefresh size={16} strokeWidth={2.4} style={{ marginRight: "0.5rem", verticalAlign: "-3px" }} />
+        Play again
       </button>
     </section>
-  );
-}
-
-function StatBlock({ label, value, color }) {
-  return (
-    <div className="block" style={{ padding: "1rem 0.5rem", background: color }}>
-      <div style={{ fontSize: "1.6rem", fontWeight: 800 }}>{value}</div>
-      <div style={{ fontSize: "0.75rem", fontWeight: 700, opacity: 0.75 }}>{label}</div>
-    </div>
   );
 }
