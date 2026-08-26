@@ -246,6 +246,16 @@ export function IconCopy(props) {
   );
 }
 
+export function IconWaves(props) {
+  return (
+    <Svg {...props}>
+      <path d="M4 7.5c2.7-2.2 5.3-2.2 8 0s5.3 2.2 8 0" />
+      <path d="M4 12c2.7-2.2 5.3-2.2 8 0s5.3 2.2 8 0" />
+      <path d="M4 16.5c2.7-2.2 5.3-2.2 8 0s5.3 2.2 8 0" />
+    </Svg>
+  );
+}
+
 export function IconWifi(props) {
   return (
     <Svg {...props}>

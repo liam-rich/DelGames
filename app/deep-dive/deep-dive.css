@@ -1,0 +1,266 @@
+/* Deep Dive — the dive, printed.
+   The ocean isn't a photograph here, it's ink coverage: the stock floods with
+   blue as --dd-t climbs (0 at the surface, 1 in the trench) while the cards
+   stay newsprint-white so they never stop being readable. --dd-fg is set from
+   JS and flips the shell-level text once the ground is too dark for ink. */
+
+.dd-shell {
+  --dd-t: 0;
+  --dd-fg: var(--ink);
+  position: relative;
+  min-height: 100vh;
+  color: var(--dd-fg);
+  background: var(--stock);
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 700ms ease;
+}
+
+/* The ink flood. One flat blue, gaining coverage with depth. */
+.dd-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background: linear-gradient(180deg, #2f6fc4 0%, #1f4fa8 45%, #0d2555 100%);
+  opacity: var(--dd-t);
+  transition: opacity 900ms ease;
+}
+
+/* Halftone sits over everything, so the flood reads as print, not gradient. */
+.dd-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--halftone);
+  background-size: 5px 5px;
+  opacity: 0.55;
+}
+
+.dd-stage {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--s5) var(--s5) var(--s7);
+}
+
+/* ---------- cards keep the house print style ---------- */
+
+.dd-panel {
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--stock-bright);
+  color: var(--ink);
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--ink);
+}
+
+.dd-btn {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--ink-ochre);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: var(--s3) var(--s5);
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.dd-btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.dd-btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.dd-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dd-btn.ghost {
+  background: var(--stock-bright);
+}
+
+.dd-input {
+  width: 100%;
+  font-family: inherit;
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--stock-bright);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: var(--s3) var(--s4);
+  outline: none;
+}
+
+.dd-input::placeholder { color: rgba(35, 32, 28, 0.4); }
+.dd-input:focus { box-shadow: 3px 3px 0 var(--ink-pink); }
+
+.dd-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  padding: 0.22rem 0.75rem;
+  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---------- depth gauge: a printed ruler ---------- */
+
+.dd-layout {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  gap: var(--s5);
+  align-items: start;
+}
+
+.dd-gauge {
+  position: sticky;
+  top: var(--s5);
+  height: min(72vh, 560px);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--stock-bright);
+  box-shadow: 4px 4px 0 var(--ink);
+  overflow: hidden;
+}
+
+/* Ink fills the column down to the current depth. */
+.dd-gauge-fill {
+  position: absolute;
+  inset: 0 0 auto 0;
+  background: linear-gradient(180deg, #4d8ad6, #1f4fa8);
+  transition: height 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dd-gauge-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--halftone);
+  background-size: 5px 5px;
+  opacity: 0.5;
+}
+
+.dd-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px dashed rgba(35, 32, 28, 0.45);
+  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 5px 0;
+  line-height: 1.2;
+  color: var(--ink);
+  z-index: 1;
+}
+
+/* The ink rises past these graduations, so each one is knocked out of the
+   plate rather than sitting on top of whatever colour happens to be behind. */
+.dd-zone span {
+  background: var(--stock-bright);
+  padding: 0 4px 1px;
+  border-radius: 2px;
+}
+
+.dd-diver {
+  position: absolute;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-left: -0.95rem;
+  margin-top: -0.95rem;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border-radius: 50%;
+  border: var(--border-w) solid var(--ink);
+  background: var(--ink-ochre);
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: top 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 2;
+}
+
+/* ---------- timer ---------- */
+
+.dd-timer {
+  height: 0.8rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--stock);
+}
+
+.dd-timer-fill {
+  height: 100%;
+  background: var(--ink-blue);
+  transition: width 250ms linear, background 300ms ease;
+}
+
+.dd-timer-fill.warn { background: var(--ink-ochre); }
+.dd-timer-fill.danger { background: var(--ink-pink); }
+
+/* ---------- bubbles: printed outlines, not glass ---------- */
+
+.dd-bubbles {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dd-bubble {
+  position: absolute;
+  bottom: -8%;
+  border-radius: 50%;
+  border: 2px solid var(--dd-fg);
+  /* No bubbles above the waterline — they fade in as the ink floods. */
+  opacity: calc(var(--dd-t) * 0.4);
+  transition: opacity 900ms ease;
+  animation: dd-rise linear infinite;
+}
+
+@keyframes dd-rise {
+  from { transform: translateY(0) translateX(0); }
+  to { transform: translateY(-115vh) translateX(16px); }
+}
+
+.dd-pop { animation: dd-pop 380ms cubic-bezier(0.22, 1.4, 0.4, 1); }
+
+@keyframes dd-pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 720px) {
+  .dd-layout { grid-template-columns: 66px 1fr; gap: var(--s3); }
+  .dd-gauge { height: min(62vh, 420px); }
+  .dd-zone { font-size: 0.42rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-bubble, .dd-diver, .dd-gauge-fill { animation: none; transition-duration: 1ms; }
+  .dd-shell::before, .dd-shell { transition-duration: 1ms; }
+  .dd-btn { transition: none; }
+  .dd-btn:hover:not(:disabled), .dd-btn:active:not(:disabled) { transform: none; }
+}

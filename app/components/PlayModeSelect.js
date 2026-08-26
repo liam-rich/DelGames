@@ -2,7 +2,26 @@
 
 import { IconSmartphone, IconUsers, IconWifi } from "../icons";
 
-export default function PlayModeSelect({ title, description, onChoose }) {
+// The two-player games use the default pair of modes; Deep Dive passes its own
+// list so it can offer a solo run alongside them.
+export const DEFAULT_MODES = [
+  {
+    key: "pass-and-play",
+    Icon: IconUsers,
+    title: "Pass & play",
+    body: "One device, passed back and forth between you.",
+    color: "var(--ink-blue)",
+  },
+  {
+    key: "online",
+    Icon: IconWifi,
+    title: "Two phones",
+    body: "Each of you joins from your own phone with a room code.",
+    color: "var(--ink-pink)",
+  },
+];
+
+export default function PlayModeSelect({ title, description, onChoose, modes = DEFAULT_MODES }) {
   return (
     <section
       className="block"
@@ -13,21 +32,12 @@ export default function PlayModeSelect({ title, description, onChoose }) {
         {description && <p style={{ opacity: 0.75, lineHeight: 1.5 }}>{description}</p>}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
-        <ModeCard
-          Icon={IconUsers}
-          title="Pass & play"
-          body="One device, passed back and forth between you."
-          color="var(--teal)"
-          onClick={() => onChoose("pass-and-play")}
-        />
-        <ModeCard
-          Icon={IconWifi}
-          title="Two phones"
-          body="Each of you joins from your own phone with a room code."
-          color="var(--purple)"
-          onClick={() => onChoose("online")}
-        />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
+        {/* `key` is pulled out of the spread — React rejects it being passed
+            through props rather than set directly on the element. */}
+        {modes.map(({ key, ...rest }) => (
+          <ModeCard key={key} {...rest} onClick={() => onChoose(key)} />
+        ))}
       </div>
     </section>
   );
