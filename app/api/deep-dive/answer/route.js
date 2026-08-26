@@ -18,7 +18,10 @@ export async function POST(request) {
   const observed = await readObserved(prompt.id);
   const result = scoreAnswer(prompt, body?.answer, observed);
 
-  if (result.valid) {
+  // A preview is the check made while the player is still typing — it must not
+  // count toward the live answer distribution, or a run of rejected guesses
+  // would skew the rarity of whatever they eventually land on.
+  if (result.valid && !body?.preview) {
     // Fire and forget — the player shouldn't wait on bookkeeping.
     recordAnswer(prompt.id, result.answer);
   }

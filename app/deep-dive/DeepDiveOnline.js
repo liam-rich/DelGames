@@ -26,6 +26,7 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
   const [guess, setGuess] = useState("");
   const [busy, setBusy] = useState(false);
   const [timeLeft, setTimeLeft] = useState(25);
+  const [rejection, setRejection] = useState(null); // word tried that isn't in the bank
   const inputRef = useRef(null);
   const guessRef = useRef("");
   const sentRef = useRef(false);
@@ -44,13 +45,15 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
     if (phase !== "playing" || iAnswered || !state) return undefined;
     setTimeLeft(state.seconds);
     sentRef.current = false;
+    setRejection(null);
     const startedAt = Date.now();
     const id = setInterval(() => {
       const left = state.seconds - (Date.now() - startedAt) / 1000;
       if (left <= 0) {
         clearInterval(id);
         setTimeLeft(0);
-        send(guessRef.current);
+        // Out of time — whatever is in the box goes in, valid or not.
+        send(guessRef.current, { force: true });
       } else {
         setTimeLeft(left);
       }
@@ -63,13 +66,30 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
     if (phase === "playing" && !iAnswered) inputRef.current?.focus();
   }, [phase, index, iAnswered]);
 
-  async function send(answer) {
+  // A word that isn't in the bank costs seconds, not the prompt. It's checked
+  // as a preview first so a rejected try neither commits nor counts toward the
+  // live answer stats; the engine does the authoritative scoring on commit.
+  async function send(answer, { force = false } = {}) {
     if (sentRef.current) return;
-    sentRef.current = true;
     setBusy(true);
     try {
+      if (!force) {
+        const res = await fetch("/api/deep-dive/answer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ promptId: state.prompts[index].id, answer, preview: true }),
+        });
+        const data = await res.json();
+        if (!data.valid) {
+          setRejection({ text: answer, suggestion: data.suggestion || null });
+          inputRef.current?.select();
+          return;
+        }
+      }
+      sentRef.current = true;
       await dispatch({ type: "SUBMIT_ANSWER", seat, answer });
       setGuess("");
+      setRejection(null);
     } catch {
       sentRef.current = false;
     } finally {
@@ -161,6 +181,35 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
                   spellCheck={false}
                   maxLength={40}
                 />
+                {rejection && (
+                  <div
+                    style={{
+                      borderLeft: "4px solid var(--ink-pink)",
+                      paddingLeft: "var(--s3)",
+                      display: "grid",
+                      gap: "var(--s2)",
+                      justifyItems: "start",
+                    }}
+                  >
+                    <p style={{ fontSize: "0.9rem" }}>
+                      <strong style={{ textTransform: "capitalize" }}>{rejection.text}</strong>
+                      {" isn't in the bank for this one. Keep going — you've still got time."}
+                    </p>
+                    {rejection.suggestion && (
+                      <button
+                        type="button"
+                        className="dd-btn"
+                        style={{ padding: "var(--s2) var(--s4)", fontSize: "0.85rem" }}
+                        onClick={() => send(rejection.suggestion, { force: true })}
+                        disabled={busy}
+                      >
+                        Did you mean{" "}
+                        <span style={{ textTransform: "capitalize" }}>{rejection.suggestion}</span>?
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 <button type="submit" className="dd-btn" disabled={busy || !guess.trim()}>
                   Lock it in
                 </button>
