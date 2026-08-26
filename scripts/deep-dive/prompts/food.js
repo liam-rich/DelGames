@@ -64,4 +64,88 @@ export default [
       "basil, oregano, thyme, rosemary, sage, parsley, coriander|cilantro, mint, dill, chives, tarragon, bay leaf, marjoram, fennel, cumin, paprika, turmeric, ginger, cinnamon, nutmeg, cloves, cardamom, saffron, chilli powder, cayenne, black pepper, white pepper, mustard, mustard seed, garlic powder, onion powder, star anise, aniseed, caraway, coriander seed, allspice, mace, vanilla, lemongrass, curry powder, garam masala, five spice, sumac, za atar, harissa, fenugreek, asafoetida, juniper, horseradish, wasabi, poppy seed, sesame, celery salt, herbes de provence, lovage, chervil, borage, savory",
     bias: { mint: 0.4, sage: 0.2, ginger: 0.5, basil: 1.4, rosemary: 0.6, bay: 0.1 },
   },
+  {
+    id: "sandwich-filling",
+    text: "Name a sandwich filling",
+    answers:
+      "cheese, ham, tuna, chicken, egg, egg mayonnaise, bacon, turkey, beef, roast beef, salami, pastrami, corned beef, prawn, prawn mayonnaise, coronation chicken, cheese and pickle, cheese and onion, ploughmans, blt, club, peanut butter, jam, marmite, nutella, banana, cucumber, tomato, lettuce, avocado, hummus, falafel, halloumi, sausage, fish finger, chip butty, brie and cranberry, tuna sweetcorn, chicken tikka, pulled pork, meatball, philly cheesesteak, reuben, croque monsieur, cream cheese and salmon, smoked salmon, coleslaw, sardine, liver pate, cheese and ham, mozzarella and tomato",
+    bias: { cheese: 1.6, ham: 1.4, tuna: 1.3 },
+  },
+  {
+    id: "soup",
+    text: "Name a type of soup",
+    answers:
+      "tomato, chicken, chicken noodle, vegetable, minestrone, mushroom, cream of mushroom, leek and potato, French onion, oxtail, pea and ham, lentil, carrot and coriander, butternut squash, broccoli and stilton, cock a leekie, scotch broth, mulligatawny, gazpacho, borscht, miso, tom yum, pho, ramen, wonton, hot and sour, egg drop, clam chowder, chowder, bisque, lobster bisque, bouillabaisse, consomme, broth, bone broth, goulash, laksa, harira, avgolemono, minestra, chorba, sopa de ajo, split pea, black bean, chilli, cullen skink, celeriac, watercress, spinach, sweetcorn, pumpkin, gumbo, callaloo, tortilla soup, matzo ball, stracciatella",
+    bias: { tomato: 1.6, chicken: 1.5 },
+  },
+  {
+    id: "bread",
+    text: "Name a type of bread",
+    answers:
+      "white, wholemeal, brown, sourdough, baguette, ciabatta, focaccia, pitta, naan, chapati, roti, paratha, tortilla, bagel, brioche, croissant, rye, pumpernickel, soda bread, cornbread, flatbread, breadstick, crumpet, muffin, english muffin, bap, roll, bun, cob, batch, bloomer, tiger bread, granary, seeded, multigrain, spelt, focaccia, challah, pretzel, panettone, stollen, banana bread, garlic bread, milk loaf, farmhouse, ficelle, fougasse, pain de campagne, pumpernickel, injera, lavash, barbari, arepa, pao de queijo, damper, bannock, sandwich loaf",
+    bias: { white: 1.4, sourdough: 1.3, baguette: 1.3 },
+  },
+  {
+    id: "curry",
+    text: "Name a curry or Indian dish",
+    answers:
+      "tikka masala, korma, madras, vindaloo, jalfrezi, rogan josh, bhuna, dopiaza, pasanda, dhansak, balti, saag, saag aloo, aloo gobi, chana masala, dal, tarka dal, butter chicken, biryani, pilau, tandoori, naan, samosa, bhaji, onion bhaji, pakora, poppadom, raita, chutney, paneer, palak paneer, matar paneer, malai kofta, chicken chettinad, goan fish curry, thali, dosa, idli, vada, uttapam, korma, phall, ceylon, patia, achari, methi, karahi, handi, nihari, haleem, kofta, keema, kadai, lamb bhuna, prawn puri, chicken 65",
+    bias: { "tikka masala": 1.8, korma: 1.4, vindaloo: 1.3 },
+  },
+  {
+    id: "ice-cream-flavour",
+    text: "Name an ice cream flavour",
+    answers:
+      "vanilla, chocolate, strawberry, mint choc chip, cookies and cream, rum and raisin, pistachio, salted caramel, toffee, honeycomb, coffee, banana, lemon, mango, raspberry ripple, neapolitan, rocky road, cookie dough, brownie, fudge brownie, peanut butter, coconut, hazelnut, tiramisu, stracciatella, bubblegum, blue moon, black cherry, blackcurrant, passion fruit, praline, butterscotch, maple, pecan, butter pecan, matcha, green tea, red bean, taro, ube, lavender, cardamom, saffron, rose, chocolate chip, double chocolate, white chocolate, caramel swirl, mango sorbet, lemon sorbet",
+    bias: { vanilla: 1.8, chocolate: 1.6, strawberry: 1.5 },
+  },
+  {
+    id: "sweet-chocolate",
+    text: "Name a chocolate bar or sweet",
+    answers:
+      "mars, snickers, twix, bounty, milky way, galaxy, dairy milk, wispa, flake, crunchie, double decker, boost, picnic, star bar, curly wurly, chomp, fudge, freddo, aero, yorkie, kit kat, toffee crisp, lion bar, drifter, rolo, smarties, buttons, minstrels, maltesers, revels, celebrations, quality street, roses, ferrero rocher, toblerone, milka, lindt, after eight, matchmakers, terrys chocolate orange, creme egg, mini eggs, caramac, twirl, ripple, tunnocks teacake, caramel wafer, hershey, reeses, butterfinger, baby ruth, milk duds, skittles, starburst, haribo, wine gums, fruit pastilles, jelly babies, gummy bears, sherbet, refreshers, drumstick, black jack, fruit salad, love hearts, parma violets, flying saucers, rhubarb and custard, pear drops, humbugs, mint imperials, polo, extra strong mints, liquorice allsorts, aniseed balls, gobstopper, lollipop, chupa chups, toffee, fudge, turkish delight",
+    bias: { "dairy milk": 1.4, mars: 1.3, "kit kat": 1.4 },
+  },
+  {
+    id: "crisps-snack",
+    text: "Name a crisp flavour or savoury snack",
+    answers:
+      "ready salted, salt and vinegar, cheese and onion, prawn cocktail, smoky bacon, roast chicken, beef, worcester sauce, sweet chilli, sour cream and chive, salt and pepper, barbecue, paprika, pickled onion, marmite, thai sweet chilli, flame grilled steak, tomato ketchup, cheddar, sea salt, balsamic vinegar, hoisin duck, wasabi, doritos, pringles, walkers, monster munch, wotsits, quavers, skips, frazzles, hula hoops, chipsticks, discos, squares, mccoys, kettle chips, tyrrells, sensations, nik naks, space raiders, scampi fries, bacon fries, pork scratchings, twiglets, cheeselets, mini cheddars, ritz, breadsticks, pretzels, popcorn, tortilla chips, nachos, poppadoms, bombay mix, peanuts, cashews, wasabi peas, olives",
+    bias: { "ready salted": 1.5, "salt and vinegar": 1.5, "cheese and onion": 1.5 },
+  },
+  {
+    id: "biscuit",
+    text: "Name a biscuit",
+    answers:
+      "digestive, chocolate digestive, hobnob, rich tea, custard cream, bourbon, jammie dodger, party ring, nice, garibaldi, ginger nut, shortbread, viennese whirl, pink wafer, malted milk, fig roll, jaffa cake, penguin, club, blue riband, kit kat, breakaway, wagon wheel, tunnocks, caramel wafer, oreo, chocolate chip cookie, cookie, gingerbread, biscotti, macaroon, amaretti, langue de chat, florentine, brandy snap, cantuccini, speculoos, lotus, stroopwafel, animal biscuit, iced gem, bourbon cream, lemon puff, abernethy, oatcake, cracker, cream cracker, water biscuit, ryvita, matzo, wafer, snickerdoodle, shortcake, empire biscuit, melting moment",
+    bias: { digestive: 1.6, hobnob: 1.3, "custard cream": 1.3 },
+  },
+  {
+    id: "hot-drink",
+    text: "Name a hot drink",
+    answers:
+      "tea, coffee, hot chocolate, latte, cappuccino, espresso, americano, flat white, macchiato, mocha, cortado, ristretto, filter coffee, instant coffee, decaf, english breakfast, earl grey, green tea, peppermint tea, chamomile, camomile tea, rooibos, chai, masala chai, jasmine tea, oolong, matcha, herbal tea, fruit tea, lemon and ginger, builders tea, milky coffee, irish coffee, mulled wine, mulled cider, hot toddy, bovril, ovaltine, horlicks, malted milk, hot squash, lemon and honey, turmeric latte, bone broth, hot ribena, hot blackcurrant, sahlab, atole, yerba mate",
+    bias: { tea: 1.8, coffee: 1.8, "hot chocolate": 1.5 },
+  },
+  {
+    id: "alcoholic-drink",
+    text: "Name an alcoholic drink",
+    answers:
+      "beer, lager, ale, bitter, stout, guinness, cider, wine, red wine, white wine, rose, prosecco, champagne, cava, port, sherry, vermouth, whisky|whiskey, scotch, bourbon, rye, vodka, gin, rum, dark rum, white rum, spiced rum, tequila, mezcal, brandy, cognac, armagnac, calvados, absinthe, sambuca, ouzo, raki, grappa, schnapps, aquavit, soju, sake, baijiu, mead, perry, cachaca, pisco, amaretto, baileys, kahlua, tia maria, cointreau, triple sec, limoncello, campari, aperol, chartreuse, jagermeister, pastis, pernod, advocaat, snowball, shandy, alcopop, wkd, pimms, cherry brandy, creme de cassis, midori, malibu, southern comfort, drambuie, frangelico, disaronno",
+    bias: { beer: 1.6, wine: 1.6, vodka: 1.3 },
+  },
+  {
+    id: "sauce-condiment",
+    text: "Name a sauce or condiment",
+    answers:
+      "ketchup, mayonnaise, mustard, english mustard, dijon, wholegrain mustard, brown sauce, hp sauce, worcestershire sauce, soy sauce, sweet chilli, sriracha, tabasco, hot sauce, barbecue sauce, salad cream, tartare sauce, horseradish, mint sauce, cranberry sauce, apple sauce, gravy, bread sauce, hollandaise, bearnaise, bechamel, veloute, white sauce, cheese sauce, tomato sauce, pesto, aioli, garlic mayo, ranch, thousand island, blue cheese dressing, caesar dressing, vinaigrette, balsamic, olive oil, chilli oil, hoisin, oyster sauce, fish sauce, teriyaki, ponzu, wasabi, chimichurri, salsa, guacamole, tzatziki, hummus, harissa, piri piri, peri peri, curry sauce, satay, tahini, chutney, mango chutney, piccalilli, branston, marmite, relish, pickle, vinegar, malt vinegar, tomato relish, tartar",
+    bias: { ketchup: 1.8, mayonnaise: 1.6, mustard: 1.4 },
+  },
+  {
+    id: "nut-seed",
+    text: "Name a nut or seed",
+    answers:
+      "peanut, almond, cashew, walnut, hazelnut, pistachio, pecan, brazil nut, macadamia, chestnut, pine nut, coconut, acorn, beech nut, hickory, ginkgo nut, tiger nut, sunflower seed, pumpkin seed, sesame seed, chia seed, flax seed|linseed, poppy seed, hemp seed, caraway seed, fennel seed, mustard seed, coriander seed, cumin seed, nigella seed, quinoa, buckwheat, millet, amaranth, cocoa bean, coffee bean, nutmeg, monkey nut, kola nut, betel nut, candlenut, water chestnut, lotus seed, melon seed, safflower seed",
+    bias: { peanut: 1.6, almond: 1.5, cashew: 1.3 },
+  },
 ]

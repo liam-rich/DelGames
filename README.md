@@ -7,9 +7,13 @@ A small arcade of the puzzle games we keep coming back to — built with Next.js
 - **Word Streak** — our "Chain" game. Player 1 builds a 5-word chain where each word connects to the next. Player 2 sees the first word and the first letters of the rest, then reveals letters or guesses their way down the chain.
 - **Codenames Duet** — the two-player co-op version of Codenames.
 - **Category Scales** — a reversed Wavelength: one of you secretly marks a scale, the other invents categories and guesses where the mark is.
-- **Deep Dive** — single player. Seven prompts, 25 seconds each, name one thing. The rarer your answer, the deeper you sink.
+- **Deep Dive** — solo, pass-and-play or two phones. Seven prompts, 25 seconds each, name one thing. The rarer your answer, the deeper you sink. 109 prompts across six themed packs.
 
 The first three are two-player, and each offers pass-and-play or two-phone online play.
+
+Deep Dive prompts are grouped into packs — Mixed Bag (everything), Atlas,
+Natural World, The Larder, Showtime and Household. Each pack narrows the pool
+and repaints the dive with its own ink and printed pattern.
 
 ## Deep Dive scoring
 

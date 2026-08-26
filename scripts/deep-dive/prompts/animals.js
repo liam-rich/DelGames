@@ -43,4 +43,60 @@ export default [
       "cow, sheep, pig, chicken, horse, goat, duck, goose, turkey, donkey, hen, rooster|cockerel, lamb, calf, piglet, bull, ox, sow, ram, ewe, foal, pony, alpaca, llama, rabbit, guinea fowl, pheasant, quail, dog, cat, sheepdog, mule, bullock, heifer, gander, gosling, duckling, chick, kid, billy goat, nanny goat, boar, stallion, mare, emu, ostrich, peacock, turkey hen",
     bias: { ox: 0.3, ram: 0.1, kid: 0.02, sow: 0.1, mare: 0.4, boar: 0.4, chick: 0.1 },
   },
+  {
+    id: "amphibian",
+    text: "Name an amphibian",
+    answers:
+      "frog, toad, newt, salamander, tadpole, tree frog, bullfrog, poison dart frog, common frog, natterjack toad, cane toad, axolotl, caecilian, fire salamander, great crested newt, smooth newt, palmate newt, spotted salamander, tiger salamander, mudpuppy, olm, hellbender, glass frog, goliath frog, wood frog, leopard frog, spring peeper, midwife toad, spadefoot toad, clawed frog, surinam toad, marsh frog, pool frog, edible frog",
+    bias: { frog: 2, toad: 1.5, newt: 1.3 },
+  },
+  {
+    id: "dinosaur",
+    text: "Name a dinosaur",
+    answers:
+      "tyrannosaurus rex|t rex, triceratops, stegosaurus, velociraptor, brachiosaurus, diplodocus, brontosaurus, ankylosaurus, spinosaurus, allosaurus, pterodactyl, pteranodon, iguanodon, parasaurolophus, apatosaurus, archaeopteryx, compsognathus, dilophosaurus, gallimimus, carnotaurus, giganotosaurus, therizinosaurus, oviraptor, protoceratops, pachycephalosaurus, deinonychus, utahraptor, microraptor, plesiosaur, ichthyosaur, mosasaurus, megalodon, dimetrodon, styracosaurus, corythosaurus, edmontosaurus, maiasaura, troodon, baryonyx, suchomimus, argentinosaurus, titanosaurus, seismosaurus, camarasaurus, kentrosaurus, nodosaurus, sauropelta",
+    bias: { "tyrannosaurus rex": 2, triceratops: 1.5, stegosaurus: 1.4 },
+  },
+  {
+    id: "spider-arachnid",
+    text: "Name a spider or arachnid",
+    answers:
+      "tarantula, black widow, house spider, garden spider, wolf spider, jumping spider, funnel web, redback, brown recluse, huntsman, orb weaver, money spider, crab spider, trapdoor spider, camel spider, daddy long legs, false widow, raft spider, fishing spider, spitting spider, cellar spider, lynx spider, goliath birdeater, scorpion, whip scorpion, pseudoscorpion, harvestman, tick, mite, dust mite, chigger, red mite, sun spider, sea spider, bird eating spider, water spider, cave spider, zebra spider",
+    bias: { tarantula: 1.6, "black widow": 1.4 },
+  },
+  {
+    id: "bird-of-prey",
+    text: "Name a bird of prey",
+    answers:
+      "eagle, hawk, falcon, kestrel, buzzard, osprey, owl, barn owl, tawny owl, snowy owl, eagle owl, little owl, short eared owl, long eared owl, harrier, hen harrier, marsh harrier, sparrowhawk, goshawk, peregrine falcon, merlin, hobby, gyrfalcon, red kite, black kite, golden eagle, bald eagle, white tailed eagle, sea eagle, harpy eagle, martial eagle, tawny eagle, booted eagle, vulture, griffon vulture, turkey vulture, condor, andean condor, californian condor, secretary bird, caracara, bateleur, honey buzzard, rough legged buzzard, lammergeier",
+    bias: { eagle: 1.6, owl: 1.3, hawk: 1.2 },
+  },
+  {
+    id: "rodent",
+    text: "Name a rodent",
+    answers:
+      "mouse, rat, squirrel, hamster, guinea pig, gerbil, chipmunk, beaver, porcupine, chinchilla, capybara, vole, shrew, dormouse, lemming, marmot, groundhog, prairie dog, gopher, muskrat, coypu, agouti, degu, jerboa, springhare, red squirrel, grey squirrel, flying squirrel, ground squirrel, harvest mouse, field mouse, house mouse, brown rat, black rat, water vole, bank vole, pocket mouse, kangaroo rat, naked mole rat, paca, nutria, viscacha, mara",
+    bias: { mouse: 1.6, rat: 1.4, squirrel: 1.4 },
+  },
+  {
+    id: "primate",
+    text: "Name a primate",
+    answers:
+      "monkey, chimpanzee, gorilla, orangutan, bonobo, gibbon, baboon, mandrill, macaque, lemur, ring tailed lemur, aye aye, loris, slow loris, tarsier, marmoset, tamarin, capuchin, spider monkey, howler monkey, squirrel monkey, proboscis monkey, colobus, langur, vervet, rhesus monkey, japanese macaque, barbary ape, silverback, siamang, indri, sifaka, galago|bushbaby, potto, uakari, saki, titi monkey, guenon, drill, gelada",
+    bias: { monkey: 1.6, gorilla: 1.4, chimpanzee: 1.3 },
+  },
+  {
+    id: "marsupial",
+    text: "Name a marsupial",
+    answers:
+      "kangaroo, koala, wombat, wallaby, possum, opossum, quokka, tasmanian devil, bandicoot, bilby, sugar glider, numbat, quoll, cuscus, potoroo, bettong, pademelon, tree kangaroo, marsupial mole, dunnart, antechinus, thylacine, red kangaroo, grey kangaroo, wallaroo, honey possum, ringtail possum, brushtail possum, glider, yapok",
+    bias: { kangaroo: 2, koala: 1.6, wombat: 1.3 },
+  },
+  {
+    id: "arctic-animal",
+    text: "Name an animal that lives in the Arctic or Antarctic",
+    answers:
+      "polar bear, penguin, emperor penguin, walrus, seal, harp seal, leopard seal, ringed seal, arctic fox, arctic hare, arctic wolf, reindeer|caribou, musk ox, snowy owl, puffin, narwhal, beluga, orca, humpback whale, blue whale, minke whale, bowhead whale, lemming, ermine|stoat, wolverine, snow petrel, albatross, skua, tern, arctic tern, krill, ptarmigan, snow goose, eider duck, seal pup, elephant seal, fur seal, weddell seal, crabeater seal, adelie penguin, gentoo penguin, king penguin, chinstrap penguin, rock ptarmigan, ivory gull",
+    bias: { "polar bear": 2, penguin: 1.6 },
+  },
 ]

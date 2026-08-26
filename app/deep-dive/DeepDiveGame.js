@@ -29,6 +29,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [rejection, setRejection] = useState(null); // word tried that isn't in the bank
+  const [pack, setPack] = useState("general");
 
   const inputRef = useRef(null);
   const guessRef = useRef("");
@@ -50,7 +51,11 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/deep-dive/run", { method: "POST" });
+      const res = await fetch("/api/deep-dive/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pack }),
+      });
       if (!res.ok) throw new Error("Could not start a dive.");
       const data = await res.json();
       setPrompts(data.prompts);
@@ -67,7 +72,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
     } finally {
       setBusy(false);
     }
-  }, [twoPlayer]);
+  }, [twoPlayer, pack]);
 
   const score = useCallback(
     async (promptId, answer) => {
@@ -177,7 +182,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
 
   return (
     <div
-      className="dd-shell"
+      className={`dd-shell pack-${pack}`}
       style={{
         "--dd-t": fraction.toFixed(3),
         "--dd-fg": fraction > 0.35 ? "var(--stock-bright)" : "var(--ink)",
@@ -205,7 +210,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
           </div>
         )}
 
-        {phase === "intro" && <Intro onStart={startRun} busy={busy} />}
+        {phase === "intro" && <Intro onStart={startRun} busy={busy} pack={pack} onPack={setPack} />}
 
         {phase !== "intro" && (
           <div className="dd-layout">

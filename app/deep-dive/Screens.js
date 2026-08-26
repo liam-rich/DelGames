@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { IconTrophy, IconCheck, IconX } from "../icons";
 import { formatDepth, zoneFor } from "./zones";
+import { PACKS, packCount } from "./packs";
 
 const RULES = [
   "Seven prompts. 25 seconds each. Name one thing.",
@@ -11,7 +12,46 @@ const RULES = [
   "Every point is 10 metres. 700 points reaches the trench floor.",
 ];
 
-export function Intro({ onStart, busy }) {
+export function PackPicker({ value, onChange }) {
+  return (
+    <div className="dd-panel" style={{ padding: "var(--s5)", display: "grid", gap: "var(--s3)" }}>
+      <h2 style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.75 }}>
+        Pick a pack
+      </h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "var(--s2)" }}>
+        {PACKS.map((pack) => {
+          const active = pack.id === value;
+          return (
+            <button
+              key={pack.id}
+              type="button"
+              onClick={() => onChange(pack.id)}
+              style={{
+                textAlign: "left",
+                cursor: "pointer",
+                font: "inherit",
+                border: "var(--border-w) solid var(--ink)",
+                borderRadius: "var(--radius)",
+                padding: "var(--s3)",
+                display: "grid",
+                gap: "0.15rem",
+                background: active ? pack.ink : "var(--stock)",
+                color: active ? "var(--stock-bright)" : "var(--ink)",
+                boxShadow: active ? "3px 3px 0 var(--ink)" : "none",
+              }}
+            >
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 800 }}>{pack.name}</span>
+              <span style={{ fontSize: "0.75rem", opacity: 0.8, lineHeight: 1.35 }}>{pack.blurb}</span>
+              <span className="eyebrow" style={{ opacity: active ? 0.85 : 0.55 }}>{packCount(pack.id)} prompts</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function Intro({ onStart, busy, pack, onPack }) {
   return (
     <div style={{ display: "grid", gap: "1.25rem", maxWidth: 640, margin: "0 auto", paddingTop: "1.5rem" }}>
       <div style={{ textAlign: "center" }}>
@@ -41,6 +81,8 @@ export function Intro({ onStart, busy }) {
           </div>
         ))}
       </div>
+
+      {onPack && <PackPicker value={pack} onChange={onPack} />}
 
       <button className="dd-btn" onClick={onStart} disabled={busy} style={{ fontSize: "1.15rem", padding: "1.1rem" }}>
         {busy ? "Preparing..." : "▼  BEGIN DESCENT  ▼"}

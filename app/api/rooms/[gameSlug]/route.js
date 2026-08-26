@@ -20,8 +20,17 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: err.message }, { status: 404 });
   }
 
+  // Optional creation options — Deep Dive uses this to pick a themed pack.
+  // Engines that don't take options simply ignore it.
+  let options = {};
   try {
-    const room = await createRoom(gameSlug, engine.createInitialState());
+    options = (await request.json()) || {};
+  } catch {
+    // No body is fine.
+  }
+
+  try {
+    const room = await createRoom(gameSlug, engine.createInitialState(options));
     return NextResponse.json(room);
   } catch (err) {
     return NextResponse.json({ error: err.message || "Could not create room." }, { status: 500 });

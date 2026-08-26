@@ -107,12 +107,21 @@ function buildPrompt(prompt, counts) {
 
 async function main() {
   const counts = await loadCorpus();
-  const files = ["nature", "animals", "food", "world", "culture", "everyday"];
+  // Which themed pack each source file feeds. Everything also belongs to the
+  // general pool, which is simply every prompt.
+  const filePacks = {
+    nature: "wild",
+    animals: "wild",
+    food: "food",
+    world: "geography",
+    culture: "culture",
+    everyday: "everyday",
+  };
   const prompts = [];
 
-  for (const name of files) {
+  for (const [name, pack] of Object.entries(filePacks)) {
     const mod = await import(`./prompts/${name}.js`);
-    for (const p of mod.default) prompts.push(buildPrompt(p, counts));
+    for (const p of mod.default) prompts.push({ ...buildPrompt(p, counts), pack });
   }
 
   const ids = new Set();
@@ -131,11 +140,20 @@ async function main() {
       `export const BANK = ${JSON.stringify(prompts)};\n`
   );
 
+  const byPack = {};
+  for (const p of prompts) byPack[p.pack] = (byPack[p.pack] || 0) + 1;
+
+  // Client-safe counts (no answers), so the pack picker can't drift out of
+  // date when prompts are added.
+  await writeFile(
+    join(ROOT, "lib", "deepDive", "packCounts.js"),
+    "// GENERATED FILE — run scripts/deep-dive/build-bank.mjs\n" +
+      `export const PACK_COUNTS = ${JSON.stringify({ general: prompts.length, ...byPack })};\n`
+  );
+
   console.log(`Wrote ${prompts.length} prompts to lib/deepDive/bank.js`);
-  for (const p of prompts.slice(0, 3)) {
-    const top = p.answers.slice(0, 3).map((a) => `${a.key} ${(a.share * 100).toFixed(1)}%`);
-    const rare = p.answers.slice(-2).map((a) => `${a.key} ${(a.share * 100).toFixed(1)}%`);
-    console.log(`  ${p.id}: ${top.join(", ")} ... ${rare.join(", ")}`);
+  for (const [pack, n] of Object.entries(byPack).sort((a, b) => b[1] - a[1])) {
+    console.log(`  ${pack.padEnd(10)} ${String(n).padStart(3)} prompts`);
   }
 }
 

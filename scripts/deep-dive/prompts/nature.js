@@ -32,4 +32,39 @@ export default [
       "rose, tulip, daisy, sunflower, daffodil, lily, orchid, carnation, chrysanthemum, peony, poppy, violet, pansy, petunia, marigold, lavender, bluebell, snowdrop, crocus, hyacinth, iris, dahlia, geranium, begonia, azalea, rhododendron, hydrangea, camellia, magnolia, jasmine, honeysuckle, foxglove, buttercup, dandelion, primrose, cowslip, forget me not, sweet pea, freesia, gladiolus, anemone, aster, zinnia, lupin, delphinium, hollyhock, wisteria, clematis, nasturtium, cornflower, heather, thistle, lotus, water lily, amaryllis, gardenia, hibiscus, bird of paradise, edelweiss, buddleia, cyclamen, gerbera",
     bias: { rose: 0.4, iris: 0.2, violet: 0.2, lily: 0.4, poppy: 0.5, jasmine: 0.3, heather: 0.2, daisy: 0.6 },
   },
+  {
+    id: "fungus",
+    text: "Name a mushroom or fungus",
+    answers:
+      "mushroom, button mushroom, portobello, chestnut mushroom, chanterelle, porcini, morel, truffle, shiitake, oyster mushroom, enoki, king oyster, field mushroom, horse mushroom, puffball, giant puffball, fly agaric, death cap, destroying angel, deathcap, inkcap, shaggy ink cap, honey fungus, bracket fungus, chicken of the woods, beefsteak fungus, jelly ear, wood blewit, parasol mushroom, st georges mushroom, penny bun, bay bolete, cep, milk cap, russula, amanita, stinkhorn, earthstar, birds nest fungus, cauliflower fungus, dryads saddle, turkey tail, reishi, cordyceps, yeast, mould, mildew, lichen, athletes foot, dry rot",
+    bias: { mushroom: 2, truffle: 1.2, "fly agaric": 1.1 },
+  },
+  {
+    id: "garden-item",
+    text: "Name something you'd find in a garden",
+    answers:
+      "grass, lawn, flowers, tree, hedge, shed, fence, gate, path, patio, decking, pond, fountain, birdbath, bird feeder, bird table, greenhouse, shrub, bush, compost heap, wheelbarrow, lawnmower, hose, watering can, spade, fork, trowel, rake, hoe, shears, secateurs, gnome, bench, table, chairs, parasol, barbecue, swing, trampoline, slide, sandpit, washing line, plant pot, hanging basket, window box, trellis, arch, pergola, rockery, vegetable patch, allotment, weeds, dandelion, worm, snail, slug, bee, butterfly, ladybird, hedgehog, fox, squirrel, robin, blackbird, wall, gravel, stepping stones, water butt, log pile, beehive, sundial, statue, tool shed, cold frame, cloche",
+    bias: { grass: 1.6, flowers: 1.4, shed: 1.3 },
+  },
+  {
+    id: "gemstone",
+    text: "Name a gemstone or precious mineral",
+    answers:
+      "diamond, ruby, sapphire, emerald, amethyst, topaz, opal, jade, pearl, amber, garnet, aquamarine, turquoise, onyx, obsidian, quartz, rose quartz, citrine, peridot, tourmaline, tanzanite, moonstone, lapis lazuli, malachite, agate, jasper, bloodstone, carnelian, tigers eye, hematite, fluorite, alexandrite, zircon, spinel, morganite, kunzite, labradorite, sunstone, sodalite, azurite, rhodonite, jet, coral, ivory, marcasite, chrysoprase, iolite, apatite, kyanite, larimar",
+    bias: { diamond: 2, ruby: 1.5, emerald: 1.4 },
+  },
+  {
+    id: "metal-element",
+    text: "Name a metal or chemical element",
+    answers:
+      "gold, silver, iron, copper, aluminium|aluminum, steel, bronze, brass, tin, lead, zinc, nickel, platinum, titanium, tungsten, chromium, cobalt, manganese, magnesium, calcium, sodium, potassium, lithium, mercury, uranium, plutonium, radium, hydrogen, helium, oxygen, nitrogen, carbon, sulphur|sulfur, phosphorus, chlorine, fluorine, neon, argon, krypton, xenon, radon, silicon, boron, beryllium, barium, strontium, caesium, rubidium, iodine, bromine, arsenic, antimony, bismuth, cadmium, palladium, rhodium, iridium, osmium, rhenium, molybdenum, vanadium, scandium, yttrium, zirconium, niobium, technetium, ruthenium, hafnium, tantalum, thallium, polonium, astatine, francium, actinium, thorium, americium, curium, einsteinium, germanium, gallium, indium, selenium, tellurium",
+    bias: { gold: 1.8, silver: 1.5, iron: 1.4 },
+  },
+  {
+    id: "constellation",
+    text: "Name a constellation or star",
+    answers:
+      "orion, ursa major|great bear, ursa minor|little bear, cassiopeia, the plough|big dipper, southern cross, scorpius, sagittarius, leo, taurus, gemini, cancer, virgo, libra, aries, pisces, aquarius, capricorn, andromeda, perseus, pegasus, draco, cygnus, lyra, aquila, hercules, bootes, corona borealis, canis major, canis minor, auriga, cepheus, hydra, centaurus, crux, carina, vela, puppis, phoenix, pavo, tucana, dorado, sirius, polaris|north star, betelgeuse, rigel, vega, altair, deneb, arcturus, capella, procyon, aldebaran, antares, spica, regulus, castor, pollux, fomalhaut, canopus, alpha centauri, proxima centauri, bellatrix, mintaka, alnilam, alnitak, algol, mizar, thuban",
+    bias: { orion: 1.6, "the plough": 1.2 },
+  },
 ]

@@ -118,7 +118,7 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
 
   return (
     <div
-      className="dd-shell"
+      className={`dd-shell pack-${state.pack || "general"}`}
       style={{
         "--dd-t": fraction.toFixed(3),
         "--dd-fg": fraction > 0.35 ? "var(--stock-bright)" : "var(--ink)",
