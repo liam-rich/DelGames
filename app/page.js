@@ -38,6 +38,15 @@ const games = [
     players: "Solo",
     Icon: IconWaves,
   },
+  {
+    slug: "rarelist",
+    title: "Rarelist",
+    tagline: "Daily trivia",
+    description: "Three lists a day, the same for everyone. Name five from each — rarer answers score more.",
+    ink: "var(--ink-rust)",
+    players: "Solo",
+    Icon: IconDice,
+  },
 ];
 
 export default function Home() {
@@ -58,7 +67,7 @@ export default function Home() {
           <p className="eyebrow" style={{ marginBottom: "var(--s2)" }}>Printed for games night</p>
           <h1 style={{ maxWidth: "15ch" }}>The games we keep coming back to.</h1>
           <p style={{ marginTop: "var(--s4)", fontSize: "1.05rem", opacity: 0.75, maxWidth: "44ch" }}>
-            Four of them. Three you play with someone else, one you play alone
+            Five of them. Three you play with someone else, two you play alone
             when nobody's around.
           </p>
         </header>
