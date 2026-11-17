@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { dayIndex, rollDice, ROUNDS_PER_DAY, REROLLS_PER_DAY } from "../../lib/rarelist/core";
+import { dayIndex, rollDice, ROUNDS_PER_DAY, REROLLS_PER_ROUND } from "../../lib/rarelist/core";
 import { api } from "./api";
 import { setSoundEnabled, sfx } from "./sound";
 import Title from "./screens/Title";
@@ -223,10 +223,10 @@ export default function RarelistApp() {
         round={r}
         roll={game.rolls?.[r] || 0}
         dice={rollDice(pid, day, r, game.rolls?.[r] || 0)}
-        rerollsLeft={Math.max(0, REROLLS_PER_DAY - Object.values(game.rolls || {}).reduce((a, b) => a + b, 0))}
+        rerollsLeft={Math.max(0, REROLLS_PER_ROUND - (game.rolls?.[r] || 0))}
         onReroll={() =>
           updateGame((g) => {
-            g.rolls = { ...(g.rolls || {}), [r]: (g.rolls?.[r] || 0) + 1 };
+            g.rolls = { ...(g.rolls || {}), [r]: Math.min(REROLLS_PER_ROUND, (g.rolls?.[r] || 0) + 1) };
             return g;
           })
         }

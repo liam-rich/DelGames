@@ -223,7 +223,7 @@ export default function DicePhase({ day, round, dice, roll: rollIndex = 0, rerol
               disabled={rerollsLeft <= 0 || phase !== "assign"}
             >
               <PixelIcon name="dice" size={12} />
-              {rerollsLeft > 0 ? `Reroll · ${rerollsLeft} left today` : "No rerolls left today"}
+              {rerollsLeft > 0 ? `Reroll · ${rerollsLeft} left` : "No rerolls left"}
             </button>
             {error ? <p className="rl-error">{error}</p> : null}
             <button type="button" className="rl-btn rl-btn-start" onClick={start} disabled={phase === "loading"}>

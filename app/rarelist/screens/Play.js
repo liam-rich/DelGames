@@ -65,9 +65,11 @@ export default function Play({ day, round, state, playerId, sound, onToggleSound
   }, []);
 
   const finish = useCallback(
-    async (why) => {
+    async (reason) => {
       if (finishing.current) return;
       finishing.current = true;
+      // Five found counts as a clear even if the buzzer beat the celebration.
+      const why = foundRef.current.length >= ANSWERS_PER_ROUND ? "clear" : reason;
       setEnding(why);
       setFinishError(null);
       if (why === "timeup") sfx.timeUp();
@@ -179,7 +181,7 @@ export default function Play({ day, round, state, playerId, sound, onToggleSound
   const submit = async (e) => {
     e?.preventDefault();
     const guess = text.trim();
-    if (!guess || pending || ending) return;
+    if (!guess || pending || ending || foundRef.current.length >= ANSWERS_PER_ROUND) return;
 
     // Graded right here from the round pack — typos included — so the clock
     // never waits on the network.
@@ -346,7 +348,7 @@ export default function Play({ day, round, state, playerId, sound, onToggleSound
           spellCheck={false}
           enterKeyHint="go"
           maxLength={80}
-          disabled={Boolean(ending)}
+          disabled={Boolean(ending) || correct.length >= ANSWERS_PER_ROUND}
           aria-label="Your answer"
         />
         <button type="submit" className="rl-go" disabled={!text.trim() || pending || Boolean(ending)}>

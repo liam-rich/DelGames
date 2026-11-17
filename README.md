@@ -81,13 +81,17 @@ the API route; the browser receives one round's list at a time.
   avoiding two lists from the same category on one day.
 - **Dice** — two dice per round, a pure function of (player, day, round), so a reload never
   rerolls. The player picks which die sets the clock (30–90s) and which buys letter hints
-  (0–3). Doubles add 15 seconds. Each player gets two rerolls per day.
+  (0–3). Doubles add 15 seconds. Players get two rerolls each round.
 - **No network during play** — like Wordle or Sporcle, the round's answers ship to the browser
   (lightly scrambled) when the player rolls, and every guess, typos included, is graded on the
   device. Round results post to the server in the background, with retries.
 - **Matching** — case, accents, punctuation and leading articles are ignored; each answer has
   aliases; small typos are accepted when they point at exactly one answer; bare surnames work
   for people lists, and shared surnames ("Roosevelt") ask the player to be more specific.
+  Typos are never allowed to turn a different real thing into an answer: each list carries
+  "decoys" (other lists' answers plus common confusables such as Iceland/Ireland or
+  Libra/Libya) that are marked wrong, and numbers must match exactly ("Moana 2" isn't
+  "Moana"). `lib/rarelist/decoys.js` builds them; a list can add its own via `decoys`.
 - **Rarity** — each answer has a 1–100 popularity estimate. A simulation of players drawing
   five answers turns that into a baseline pick rate. Live pick rates are blended in with
   `w = n / (n + 200)`. When a list runs again, its last final pick rates also feed the baseline.

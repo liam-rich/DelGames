@@ -83,7 +83,7 @@ export default function Title({ day, game, prev, playerId, sound, onToggleSound,
                 <PixelIcon name="dice" size={18} />
               </span>
               <div>
-                <strong>Roll two dice.</strong> One sets your clock, the other buys letter hints. You choose which is which, and get two rerolls a day.
+                <strong>Roll two dice.</strong> One sets your clock, the other buys letter hints. You choose which is which, with two rerolls each round.
               </div>
             </li>
             <li>

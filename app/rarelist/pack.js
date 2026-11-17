@@ -17,7 +17,7 @@ export function decodePack(pack) {
     for (let i = 0; i < bytes.length; i++) bytes[i] ^= salt[i % salt.length];
     const payload = JSON.parse(new TextDecoder().decode(bytes));
     const decoded = {
-      list: { id: payload.id, surnames: payload.surnames, answers: payload.answers },
+      list: { id: payload.id, surnames: payload.surnames, answers: payload.answers, decoys: payload.decoys },
       rarity: payload.rarity,
     };
     cache.set(pack, decoded);
@@ -38,7 +38,8 @@ export function gradeGuess(decoded, guess, have) {
 }
 
 // Same shape as the server's /finish response, built from the pack.
-export function localSummary(decoded, keys, players = 0) {
+export function localSummary(decoded, allKeys, players = 0) {
+  const keys = allKeys.slice(0, 5);
   const scored = keys.map((key) => ({ key, ...decoded.rarity[key] }));
   const reveal = indexList(decoded.list)
     .answers.map((a) => ({ key: a.key, display: a.display, mine: keys.includes(a.key), ...decoded.rarity[a.key] }))
