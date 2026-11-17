@@ -1,0 +1,386 @@
+/* ==========================================================================
+   DelGames menu — an arcade select screen.
+   Same cabinet as Rarelist: CRT glass, pixel type, neon on near-black.
+   Every game is a slot in the grid with its own colour (--c) and sprite.
+   ========================================================================== */
+
+body:has(.dg-home) {
+  background: #0c0a1f;
+  background-image: none;
+}
+
+.dg-home {
+  --bg: #0c0a1f;
+  --panel: #15113a;
+  --well: #0f0c29;
+  --line: #3b3285;
+  --text: #f5f2ff;
+  --muted: #a49dd2;
+  --dim: #6d66a3;
+  --gold: #ffcc33;
+  --cyan: #2ee6ff;
+  --magenta: #ff3ea5;
+  --pixel: var(--font-pixel), "Courier New", monospace;
+
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--text);
+  background:
+    radial-gradient(110% 55% at 50% -12%, rgba(255, 62, 165, 0.24), transparent 62%),
+    radial-gradient(80% 45% at 50% 112%, rgba(46, 230, 255, 0.16), transparent 62%),
+    var(--bg);
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+/* Starfield. */
+.dg-home::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 72% 9%, rgba(255, 255, 255, 0.4) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 38% 62%, rgba(255, 255, 255, 0.3) 50%, transparent 51%),
+    radial-gradient(2px 2px at 88% 48%, rgba(46, 230, 255, 0.45) 50%, transparent 51%),
+    radial-gradient(2px 2px at 22% 84%, rgba(255, 62, 165, 0.4) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 32%, rgba(255, 255, 255, 0.35) 50%, transparent 51%);
+  background-size: 340px 340px;
+  animation: dg-drift 90s linear infinite;
+}
+
+/* Synthwave floor. */
+.dg-home::after {
+  content: "";
+  position: fixed;
+  left: -50%;
+  right: -50%;
+  bottom: -10vh;
+  height: 42vh;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 62, 165, 0.38) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255, 62, 165, 0.38) 2px, transparent 2px);
+  background-size: 56px 56px;
+  transform: perspective(300px) rotateX(62deg);
+  transform-origin: 50% 100%;
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent 85%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent 85%);
+  opacity: 0.4;
+  animation: dg-floor 2.4s linear infinite;
+}
+
+.dg-crt {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+  mix-blend-mode: multiply;
+}
+
+@keyframes dg-drift { to { background-position: 0 340px; } }
+@keyframes dg-floor { to { background-position: 0 56px, 0 0; } }
+
+.dg-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: calc(40px + env(safe-area-inset-top)) 16px calc(56px + env(safe-area-inset-bottom));
+}
+
+/* ---------- marquee ---------- */
+
+.dg-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 44px;
+}
+
+.dg-logo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0;
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: clamp(38px, 11.5vw, 96px);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.dg-logo span {
+  display: inline-block;
+  animation: dg-logo-in 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+.dg-logo-del {
+  color: var(--gold);
+  text-shadow:
+    3px 3px 0 #ff7a1a,
+    6px 6px 0 var(--magenta),
+    9px 9px 0 #4b1a7a,
+    0 0 36px rgba(255, 204, 51, 0.35);
+}
+
+.dg-logo-games {
+  color: var(--cyan);
+  text-shadow:
+    3px 3px 0 #2a7bff,
+    6px 6px 0 var(--magenta),
+    9px 9px 0 #4b1a7a,
+    0 0 36px rgba(46, 230, 255, 0.35);
+  animation-delay: 0.1s !important;
+}
+
+@keyframes dg-logo-in {
+  from { transform: translateY(-40px) scale(0.6); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.dg-select {
+  margin: 0;
+  font-family: var(--pixel);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.dg-blink {
+  color: var(--magenta);
+  animation: dg-blink 1s steps(2, start) infinite;
+}
+
+@keyframes dg-blink { to { visibility: hidden; } }
+
+/* ---------- the grid ---------- */
+
+.dg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (min-width: 720px) {
+  .dg-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+.dg-tile {
+  --c: var(--cyan);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 210px;
+  padding: 12px 12px 14px;
+  color: var(--text);
+  text-decoration: none;
+  background:
+    radial-gradient(80% 60% at 50% 42%, color-mix(in srgb, var(--c) 16%, transparent), transparent 70%),
+    var(--panel);
+  /* Notched pixel frame: four offset shadows skip the corners. */
+  box-shadow:
+    0 -4px 0 0 color-mix(in srgb, var(--c) 38%, var(--line)),
+    0 4px 0 0 color-mix(in srgb, var(--c) 38%, var(--line)),
+    -4px 0 0 0 color-mix(in srgb, var(--c) 38%, var(--line)),
+    4px 0 0 0 color-mix(in srgb, var(--c) 38%, var(--line)),
+    0 14px 0 0 rgba(0, 0, 0, 0.45);
+  outline: none;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s steps(3), box-shadow 0.12s steps(3), background 0.2s;
+  animation: dg-tile-in 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+  animation-delay: calc(var(--i) * 70ms + 250ms);
+}
+
+@media (min-width: 720px) {
+  .dg-tile { min-height: 260px; padding: 16px 16px 18px; }
+}
+
+@keyframes dg-tile-in {
+  from { transform: translateY(24px) scale(0.85); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* A scan of light that sweeps the cabinet when it's selected. */
+.dg-tile::after {
+  content: "";
+  position: absolute;
+  inset: -20% -60%;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.14) 50%, transparent 58%);
+  transform: translateX(-60%);
+  pointer-events: none;
+}
+
+.dg-tile:is(:hover, :focus-visible):not(.is-locked) {
+  transform: translateY(-6px);
+  background:
+    radial-gradient(85% 65% at 50% 42%, color-mix(in srgb, var(--c) 30%, transparent), transparent 72%),
+    var(--panel);
+  box-shadow:
+    0 -4px 0 0 var(--c),
+    0 4px 0 0 var(--c),
+    -4px 0 0 0 var(--c),
+    4px 0 0 0 var(--c),
+    0 20px 0 0 rgba(0, 0, 0, 0.45),
+    0 0 44px color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+.dg-tile:is(:hover, :focus-visible):not(.is-locked)::after {
+  animation: dg-sweep 0.8s ease-out;
+}
+
+.dg-tile:active:not(.is-locked) {
+  transform: translateY(-2px);
+}
+
+@keyframes dg-sweep {
+  from { transform: translateX(-60%); }
+  to { transform: translateX(60%); }
+}
+
+.dg-tile-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--pixel);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+.dg-slot {
+  color: var(--dim);
+}
+
+.dg-players {
+  margin-left: auto;
+  padding: 4px 5px 3px;
+  color: var(--bg);
+  background: var(--c);
+}
+
+.dg-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--c);
+}
+
+.dg-live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: dg-blink 1.2s steps(2, start) infinite;
+}
+
+.dg-tile-art {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 92px;
+}
+
+.dg-sprite {
+  width: clamp(76px, 22vw, 136px);
+  height: auto;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--c) 55%, transparent)) drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.45));
+}
+
+.dg-tile:is(:hover, :focus-visible):not(.is-locked) .dg-sprite {
+  animation: dg-bob 0.6s steps(2, end) infinite;
+}
+
+@keyframes dg-bob {
+  50% { transform: translateY(-5px); }
+}
+
+.dg-tile-name {
+  position: relative;
+  display: block;
+  font-family: var(--pixel);
+  font-size: clamp(10px, 2.9vw, 14px);
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.dg-cursor {
+  position: absolute;
+  left: -2px;
+  color: var(--c);
+  opacity: 0;
+}
+
+.dg-tile:is(:hover, :focus-visible):not(.is-locked) .dg-tile-name {
+  padding-left: 1.4em;
+  color: var(--c);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+.dg-tile:is(:hover, :focus-visible):not(.is-locked) .dg-cursor {
+  opacity: 1;
+  animation: dg-blink 0.6s steps(2, start) infinite;
+}
+
+.dg-tile-sub {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.dg-mono {
+  font-family: var(--pixel);
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--c);
+}
+
+.dg-tile.is-locked {
+  cursor: default;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 8px, transparent 8px 16px),
+    var(--well);
+}
+
+.dg-tile.is-locked .dg-tile-name,
+.dg-tile.is-locked .dg-tile-sub {
+  color: var(--dim);
+}
+
+.dg-tile.is-locked .dg-players {
+  color: var(--dim);
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+
+.dg-tile.is-locked .dg-sprite {
+  filter: none;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dg-home::before,
+  .dg-home::after,
+  .dg-tile,
+  .dg-logo span,
+  .dg-tile:is(:hover, :focus-visible) .dg-sprite,
+  .dg-tile:is(:hover, :focus-visible)::after {
+    animation: none !important;
+  }
+}
