@@ -83,6 +83,7 @@ export default function DicePhase({ day, round, dice, playerId, sound, onToggleS
           seconds: setup.seconds,
           list: setup.list,
           hints: setup.hints,
+          check: setup.check,
         });
       }, 4150)
     );

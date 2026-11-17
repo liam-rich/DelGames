@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ANSWERS_PER_ROUND, TIER_BY_KEY } from "../../../lib/rarelist/core";
+import { ANSWERS_PER_ROUND, TIER_BY_KEY, AMBIGUOUS_FORM, lookupForm } from "../../../lib/rarelist/core";
 import { Burst, CountUp, PixelIcon, TierBadge } from "../ui";
 import { sfx } from "../sound";
 import { api } from "../api";
@@ -38,16 +38,12 @@ export default function Play({ day, round, state, playerId, sound, onToggleSound
   const remaining = Math.max(0, deadline - now);
   const frac = totalMs ? remaining / totalMs : 0;
 
-  // Clock — rAF for a smooth bar, cheap enough for one screen.
+  // Clock. Five ticks a second is plenty for a 24-segment bar and a seconds
+  // readout; re-rendering every animation frame made typing sluggish on phones.
   useEffect(() => {
     if (ending) return;
-    let raf;
-    const loop = () => {
-      setNow(Date.now());
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    const id = setInterval(() => setNow(Date.now()), 200);
+    return () => clearInterval(id);
   }, [ending]);
 
   // Countdown ticks for the last ten seconds.
@@ -138,36 +134,92 @@ export default function Play({ day, round, state, playerId, sound, onToggleSound
     formRef.current?.classList.add("is-wrong");
   };
 
+  const celebrate = (entry) => {
+    if (!foundRef.current.includes(entry.key)) foundRef.current = [...foundRef.current, entry.key];
+    const count = foundRef.current.length;
+    onUpdate((r) => {
+      if ((r.correct || []).some((c) => c.key === entry.key)) return r;
+      return { ...r, correct: [...(r.correct || []), entry] };
+    });
+    setText("");
+    setHit({ key: entry.key, tier: entry.tier, id: Math.random() });
+    const t = TIER_BY_KEY[entry.tier];
+    say(`hit tier-${entry.tier}`, `+${entry.points} ${t.label.toUpperCase()}!`);
+    if (entry.tier === "legendary") {
+      sfx.legendary();
+      setBanner({ id: Math.random() });
+      if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
+    } else if (entry.tier === "rare") {
+      sfx.rare();
+      if (navigator.vibrate) navigator.vibrate(25);
+    } else sfx.correct(entry.tier);
+    if (count >= ANSWERS_PER_ROUND) setTimeout(() => finish("clear"), entry.tier === "legendary" ? 1300 : 700);
+  };
+
+  const miss = () => {
+    sfx.wrong();
+    shakeEntry();
+    onUpdate((r) => ({ ...r, misses: (r.misses || 0) + 1 }));
+    say("miss", "NOT ON THE LIST");
+    requestAnimationFrame(() => inputRef.current?.select());
+  };
+
+  // An exact answer was graded locally; ask the server for its proper name
+  // ("shaq" → "Shaquille O'Neal") without making the player wait for it.
+  const confirmInBackground = (entry, guess) => {
+    api("guess", { day, round, guess, have: foundRef.current.filter((k) => k !== entry.key) })
+      .then((res) => {
+        if (res.result === "correct" && res.key === entry.key) {
+          onUpdate((r) => ({
+            ...r,
+            correct: (r.correct || []).map((c) => (c.key === entry.key ? { ...c, display: res.display } : c)),
+          }));
+        } else if (res.result !== "correct" && res.result !== "duplicate") {
+          // A hash collision with a real answer — astronomically rare, but undo it.
+          foundRef.current = foundRef.current.filter((k) => k !== entry.key);
+          onUpdate((r) => ({ ...r, correct: (r.correct || []).filter((c) => c.key !== entry.key) }));
+        }
+      })
+      .catch(() => {});
+  };
+
   const submit = async (e) => {
     e?.preventDefault();
     const guess = text.trim();
     if (!guess || pending || ending) return;
+
+    // Fast path: exact answers and aliases are checked right here.
+    const local = lookupForm(state.check, guess);
+    if (local === AMBIGUOUS_FORM) {
+      sfx.dupe();
+      shakeEntry();
+      say("dupe", "WHICH ONE? BE MORE SPECIFIC");
+      return;
+    }
+    if (local != null && local >= 0) {
+      const a = state.check.answers[local];
+      if (foundRef.current.includes(a.key)) {
+        const got = correct.find((c) => c.key === a.key);
+        sfx.dupe();
+        setText("");
+        setFlashKey({ key: a.key, id: Math.random() });
+        say("dupe", `ALREADY GOT ${(got?.display || guess).toUpperCase()}`);
+        return;
+      }
+      const entry = { key: a.key, display: guess, tier: a.tier, points: a.points, share: a.share };
+      celebrate(entry);
+      confirmInBackground(entry, guess);
+      return;
+    }
+
+    // Slow path: possible typo, so the server's fuzzy matcher decides.
     setPending(true);
     const req = api("guess", { day, round, guess, have: foundRef.current });
     pendingRef.current = req;
     try {
       const res = await req;
       if (res.result === "correct") {
-        const entry = { key: res.key, display: res.display, tier: res.tier, points: res.points, share: res.share };
-        if (!foundRef.current.includes(entry.key)) foundRef.current = [...foundRef.current, entry.key];
-        const count = foundRef.current.length;
-        onUpdate((r) => {
-          if ((r.correct || []).some((c) => c.key === entry.key)) return r;
-          return { ...r, correct: [...(r.correct || []), entry] };
-        });
-        setText("");
-        setHit({ key: res.key, tier: res.tier, id: Math.random() });
-        const t = TIER_BY_KEY[res.tier];
-        say(`hit tier-${res.tier}`, `+${res.points} ${t.label.toUpperCase()}!`);
-        if (res.tier === "legendary") {
-          sfx.legendary();
-          setBanner({ id: Math.random() });
-          if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
-        } else if (res.tier === "rare") {
-          sfx.rare();
-          if (navigator.vibrate) navigator.vibrate(25);
-        } else sfx.correct(res.tier);
-        if (count >= ANSWERS_PER_ROUND) setTimeout(() => finish("clear"), res.tier === "legendary" ? 1300 : 700);
+        celebrate({ key: res.key, display: res.display, tier: res.tier, points: res.points, share: res.share });
       } else if (res.result === "duplicate") {
         sfx.dupe();
         setText("");
@@ -178,11 +230,7 @@ export default function Play({ day, round, state, playerId, sound, onToggleSound
         shakeEntry();
         say("dupe", "WHICH ONE? BE MORE SPECIFIC");
       } else {
-        sfx.wrong();
-        shakeEntry();
-        onUpdate((r) => ({ ...r, misses: (r.misses || 0) + 1 }));
-        say("miss", "NOT ON THE LIST");
-        requestAnimationFrame(() => inputRef.current?.select());
+        miss();
       }
     } catch (err) {
       say("miss", err.status === 409 ? "THIS PUZZLE HAS CLOSED" : "CONNECTION HICCUP · TRY AGAIN");
