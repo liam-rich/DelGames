@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ANSWERS_PER_ROUND, TIER_BY_KEY, AMBIGUOUS_FORM, lookupForm } from "../../../lib/rarelist/core";
+import { ANSWERS_PER_ROUND, TIER_BY_KEY } from "../../../lib/rarelist/core";
+import { decodePack, gradeGuess, localSummary } from "../pack";
 import { Burst, CountUp, PixelIcon, TierBadge } from "../ui";
 import { sfx } from "../sound";
 import { api } from "../api";
@@ -10,7 +11,9 @@ import { RoundPill } from "./DicePhase";
 
 const SEGMENTS = 24;
 
-export default function Play({ day, round, state, playerId, sound, onToggleSound, onUpdate, onDone, onHome }) {
+export default function Play({ day, round, state, playerId, sound, onToggleSound, onUpdate, onDone, onHome, onSubmit }) {
+  // The round's answer pack: present for every round started on this version.
+  const decoded = decodePack(state.pack);
   const totalMs = state.seconds * 1000;
   const deadline = state.startedAt + totalMs;
   const [now, setNow] = useState(() => Date.now());
@@ -74,6 +77,15 @@ export default function Play({ day, round, state, playerId, sound, onToggleSound
         try {
           await pendingRef.current;
         } catch {}
+      }
+      // Graded locally: show the summary at once and send the result to the
+      // server in the background (the app retries it until it lands).
+      if (decoded) {
+        const summary = localSummary(decoded, foundRef.current, state.players || 0);
+        onUpdate((r) => ({ ...r, done: true, endedBy: why, summary, submitted: false }));
+        onSubmit?.(round, foundRef.current);
+        setTimeout(onDone, 1400);
+        return;
       }
       const started = Date.now();
       try {
@@ -164,55 +176,33 @@ export default function Play({ day, round, state, playerId, sound, onToggleSound
     requestAnimationFrame(() => inputRef.current?.select());
   };
 
-  // An exact answer was graded locally; ask the server for its proper name
-  // ("shaq" → "Shaquille O'Neal") without making the player wait for it.
-  const confirmInBackground = (entry, guess) => {
-    api("guess", { day, round, guess, have: foundRef.current.filter((k) => k !== entry.key) })
-      .then((res) => {
-        if (res.result === "correct" && res.key === entry.key) {
-          onUpdate((r) => ({
-            ...r,
-            correct: (r.correct || []).map((c) => (c.key === entry.key ? { ...c, display: res.display } : c)),
-          }));
-        } else if (res.result !== "correct" && res.result !== "duplicate") {
-          // A hash collision with a real answer — astronomically rare, but undo it.
-          foundRef.current = foundRef.current.filter((k) => k !== entry.key);
-          onUpdate((r) => ({ ...r, correct: (r.correct || []).filter((c) => c.key !== entry.key) }));
-        }
-      })
-      .catch(() => {});
-  };
-
   const submit = async (e) => {
     e?.preventDefault();
     const guess = text.trim();
     if (!guess || pending || ending) return;
 
-    // Fast path: exact answers and aliases are checked right here.
-    const local = lookupForm(state.check, guess);
-    if (local === AMBIGUOUS_FORM) {
-      sfx.dupe();
-      shakeEntry();
-      say("dupe", "WHICH ONE? BE MORE SPECIFIC");
-      return;
-    }
-    if (local != null && local >= 0) {
-      const a = state.check.answers[local];
-      if (foundRef.current.includes(a.key)) {
-        const got = correct.find((c) => c.key === a.key);
+    // Graded right here from the round pack — typos included — so the clock
+    // never waits on the network.
+    if (decoded) {
+      const res = gradeGuess(decoded, guess, foundRef.current);
+      if (res.result === "correct") {
+        celebrate({ key: res.key, display: res.display, tier: res.tier, points: res.points, share: res.share });
+      } else if (res.result === "duplicate") {
         sfx.dupe();
         setText("");
-        setFlashKey({ key: a.key, id: Math.random() });
-        say("dupe", `ALREADY GOT ${(got?.display || guess).toUpperCase()}`);
-        return;
+        setFlashKey({ key: res.key, id: Math.random() });
+        say("dupe", `ALREADY GOT ${res.display.toUpperCase()}`);
+      } else if (res.result === "ambiguous") {
+        sfx.dupe();
+        shakeEntry();
+        say("dupe", "WHICH ONE? BE MORE SPECIFIC");
+      } else {
+        miss();
       }
-      const entry = { key: a.key, display: guess, tier: a.tier, points: a.points, share: a.share };
-      celebrate(entry);
-      confirmInBackground(entry, guess);
       return;
     }
 
-    // Slow path: possible typo, so the server's fuzzy matcher decides.
+    // Rounds started before answer packs existed fall back to the server.
     setPending(true);
     const req = api("guess", { day, round, guess, have: foundRef.current });
     pendingRef.current = req;

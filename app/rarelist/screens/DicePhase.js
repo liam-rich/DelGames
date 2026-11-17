@@ -8,7 +8,7 @@ import { sfx } from "../sound";
 import { api } from "../api";
 import TopBar from "./TopBar";
 
-export default function DicePhase({ day, round, dice, playerId, sound, onToggleSound, onHome, onBegin }) {
+export default function DicePhase({ day, round, dice, roll: rollIndex = 0, rerollsLeft = 0, onReroll, sound, onToggleSound, onHome, onBegin }) {
   const [phase, setPhase] = useState("pre"); // pre → rolling → assign → loading → reveal
   const [rollKey, setRollKey] = useState(0);
   const [landed, setLanded] = useState(0);
@@ -28,8 +28,30 @@ export default function DicePhase({ day, round, dice, playerId, sound, onToggleS
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, landed]);
 
+  // The round pack doesn't depend on the dice, so fetch it the moment the
+  // player rolls: any server latency hides behind the tumbling dice.
+  const startRef = useRef(null);
+  const fetchStart = () => {
+    startRef.current = api("start", { day, round }).catch((e) => {
+      startRef.current = null;
+      throw e;
+    });
+    startRef.current.catch(() => {});
+    return startRef.current;
+  };
+
   const roll = () => {
     if (phase !== "pre") return;
+    if (!startRef.current) fetchStart();
+    setPhase("rolling");
+    setRollKey((k) => k + 1);
+  };
+
+  const reroll = () => {
+    if (phase !== "assign" || rerollsLeft <= 0) return;
+    sfx.click();
+    onReroll();
+    setLanded(0);
     setPhase("rolling");
     setRollKey((k) => k + 1);
   };
@@ -47,8 +69,15 @@ export default function DicePhase({ day, round, dice, playerId, sound, onToggleS
     setPhase("loading");
     setError(null);
     try {
-      const data = await api("start", { playerId, day, round, swap });
-      setSetup(data);
+      const data = await (startRef.current || fetchStart());
+      const s = applyDice(dice, swap);
+      setSetup({
+        list: data.list,
+        pack: data.pack,
+        players: data.players,
+        seconds: s.seconds,
+        hints: data.hintOrder.slice(0, s.hints),
+      });
       setPhase("reveal");
     } catch (e) {
       setError(e.message || "Couldn't start the round.");
@@ -79,11 +108,13 @@ export default function DicePhase({ day, round, dice, playerId, sound, onToggleS
         begun.current = true;
         onBegin({
           swap,
-          dice: setup.dice,
+          dice,
+          roll: rollIndex,
           seconds: setup.seconds,
           list: setup.list,
           hints: setup.hints,
-          check: setup.check,
+          pack: setup.pack,
+          players: setup.players,
         });
       }, 4150)
     );
@@ -185,6 +216,15 @@ export default function DicePhase({ day, round, dice, playerId, sound, onToggleS
             ) : (
               <p className="rl-assign-help">Tap a die or ⇄ to swap which one sets your clock.</p>
             )}
+            <button
+              type="button"
+              className="rl-reroll"
+              onClick={reroll}
+              disabled={rerollsLeft <= 0 || phase !== "assign"}
+            >
+              <PixelIcon name="dice" size={12} />
+              {rerollsLeft > 0 ? `Reroll · ${rerollsLeft} left today` : "No rerolls left today"}
+            </button>
             {error ? <p className="rl-error">{error}</p> : null}
             <button type="button" className="rl-btn rl-btn-start" onClick={start} disabled={phase === "loading"}>
               <PixelIcon name="arrow" size={14} />

@@ -74,14 +74,17 @@ leaderboard.
 ## Rarelist
 
 Code lives in `lib/rarelist/` (server-side rules, list bank, rarity model, storage) and
-`app/rarelist/` (the client). The answer bank (`lib/rarelist/lists.js`) is only ever imported
-by the API route, so answers never ship to the browser; guesses are checked server-side.
+`app/rarelist/` (the client). The full answer bank (`lib/rarelist/lists.js`) is only imported by
+the API route; the browser receives one round's list at a time.
 
 - **Daily lists** — `daily.js` deals the bank out in shuffled cycles, three per UTC day,
   avoiding two lists from the same category on one day.
 - **Dice** — two dice per round, a pure function of (player, day, round), so a reload never
   rerolls. The player picks which die sets the clock (30–90s) and which buys letter hints
-  (0–3). Doubles add 15 seconds.
+  (0–3). Doubles add 15 seconds. Each player gets two rerolls per day.
+- **No network during play** — like Wordle or Sporcle, the round's answers ship to the browser
+  (lightly scrambled) when the player rolls, and every guess, typos included, is graded on the
+  device. Round results post to the server in the background, with retries.
 - **Matching** — case, accents, punctuation and leading articles are ignored; each answer has
   aliases; small typos are accepted when they point at exactly one answer; bare surnames work
   for people lists, and shared surnames ("Roosevelt") ask the player to be more specific.

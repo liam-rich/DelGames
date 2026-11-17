@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { dayIndex, rollDice, ROUNDS_PER_DAY } from "../../lib/rarelist/core";
+import { dayIndex, rollDice, ROUNDS_PER_DAY, REROLLS_PER_DAY } from "../../lib/rarelist/core";
+import { api } from "./api";
 import { setSoundEnabled, sfx } from "./sound";
 import Title from "./screens/Title";
 import DicePhase from "./screens/DicePhase";
@@ -142,6 +143,38 @@ export default function RarelistApp() {
     });
   }, []);
 
+  // Rounds are graded on the device; the result is posted afterwards so the
+  // player never waits on it. Retries with backoff, and again on next load.
+  const submitRound = useCallback(
+    async (d, round, keys, attempt = 0) => {
+      try {
+        const res = await api("finish", { playerId: playerId(), day: d, round, keys });
+        updateGame((g) => {
+          const r = g.day === d && g.rounds[round];
+          if (r) {
+            r.submitted = true;
+            if (r.summary) r.summary.players = res.players;
+          }
+          return g;
+        });
+      } catch (e) {
+        if (e.status && e.status < 500) return; // e.g. the day has closed
+        if (attempt < 5) setTimeout(() => submitRound(d, round, keys, attempt + 1), 2000 * 2 ** attempt);
+      }
+    },
+    [updateGame]
+  );
+
+  useEffect(() => {
+    if (!ready) return;
+    game.rounds.forEach((r, i) => {
+      if (r?.done && r.submitted === false) submitRound(game.day, i, (r.correct || []).map((c) => c.key));
+    });
+    // Also wake the API now, so a cold server start never lands mid-game.
+    api("today").catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
+
   const toggleSound = useCallback(() => {
     setSound((s) => {
       const on = !s;
@@ -188,7 +221,15 @@ export default function RarelistApp() {
         key={`dice-${r}`}
         {...common}
         round={r}
-        dice={rollDice(pid, day, r)}
+        roll={game.rolls?.[r] || 0}
+        dice={rollDice(pid, day, r, game.rolls?.[r] || 0)}
+        rerollsLeft={Math.max(0, REROLLS_PER_DAY - Object.values(game.rolls || {}).reduce((a, b) => a + b, 0))}
+        onReroll={() =>
+          updateGame((g) => {
+            g.rolls = { ...(g.rolls || {}), [r]: (g.rolls?.[r] || 0) + 1 };
+            return g;
+          })
+        }
         playerId={pid}
         onHome={() => setScreen("title")}
         onBegin={(setup) => {
@@ -217,6 +258,7 @@ export default function RarelistApp() {
         }
         onDone={() => setScreen("roundEnd")}
         onHome={() => setScreen("title")}
+        onSubmit={(round, keys) => submitRound(day, round, keys)}
       />
     );
   } else if (screen === "roundEnd") {
