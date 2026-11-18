@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getKv, kvConfigured, kvHost, describeKvError } from "../../../lib/kv";
+import { getKv, kvConfigured, kvHost, kvSource, describeKvError } from "../../../lib/kv";
 
 export const dynamic = "force-dynamic";
 
@@ -10,12 +10,11 @@ export async function GET() {
   const out = {
     configured: kvConfigured(),
     host: kvHost(),
-    envVars: {
-      KV_REST_API_URL: Boolean(process.env.KV_REST_API_URL),
-      KV_REST_API_TOKEN: Boolean(process.env.KV_REST_API_TOKEN),
-      UPSTASH_REDIS_REST_URL: Boolean(process.env.UPSTASH_REDIS_REST_URL),
-      UPSTASH_REDIS_REST_TOKEN: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN),
-    },
+    source: kvSource(),
+    // Names of anything that looks like database settings (never values).
+    envVarsSeen: Object.keys(process.env)
+      .filter((k) => /(REST_API|REDIS|^KV_|UPSTASH)/.test(k))
+      .sort(),
     reachable: false,
   };
   if (!out.configured) {
