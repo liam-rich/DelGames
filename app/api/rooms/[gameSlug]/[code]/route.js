@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getEngine } from "../../../../../lib/engines";
 import { getRoom, updateRoom, claimSeat, publicRoom } from "../../../../../lib/rooms";
-import { kvConfigured } from "../../../../../lib/kv";
+import { kvConfigured, describeKvError } from "../../../../../lib/kv";
 
 export async function GET(request, { params }) {
   const { gameSlug, code } = await params;
@@ -19,7 +19,13 @@ export async function GET(request, { params }) {
     return NextResponse.json({ error: err.message }, { status: 404 });
   }
 
-  const room = await getRoom(gameSlug, code);
+  let room;
+  try {
+    room = await getRoom(gameSlug, code);
+  } catch (err) {
+    console.error("[rooms] read failed:", err);
+    return NextResponse.json({ error: describeKvError(err) }, { status: 503 });
+  }
   if (!room) {
     return NextResponse.json({ error: "Room not found." }, { status: 404 });
   }
@@ -57,7 +63,11 @@ export async function POST(request, { params }) {
     const room = await updateRoom(gameSlug, code, (state) => engine.applyAction(state, action));
     return NextResponse.json(room);
   } catch (err) {
-    const status = err.status || 400;
-    return NextResponse.json({ error: err.message || "Action rejected." }, { status });
+    // Game-rule rejections carry their own message; store failures don't.
+    if (err.status || !/fetch failed|ENOTFOUND|ECONN|ETIMEDOUT|unauthori|WRONGPASS|NOAUTH/i.test(String(err.message))) {
+      return NextResponse.json({ error: err.message || "Action rejected." }, { status: err.status || 400 });
+    }
+    console.error("[rooms] action failed:", err);
+    return NextResponse.json({ error: describeKvError(err) }, { status: 503 });
   }
 }

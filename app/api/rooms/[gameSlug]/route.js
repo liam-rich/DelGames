@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getEngine } from "../../../../lib/engines";
 import { createRoom } from "../../../../lib/rooms";
-import { kvConfigured } from "../../../../lib/kv";
+import { kvConfigured, describeKvError } from "../../../../lib/kv";
 
 export async function POST(request, { params }) {
   const { gameSlug } = await params;
@@ -33,6 +33,7 @@ export async function POST(request, { params }) {
     const room = await createRoom(gameSlug, engine.createInitialState(options));
     return NextResponse.json(room);
   } catch (err) {
-    return NextResponse.json({ error: err.message || "Could not create room." }, { status: 500 });
+    console.error("[rooms] create failed:", err);
+    return NextResponse.json({ error: describeKvError(err) }, { status: 500 });
   }
 }
