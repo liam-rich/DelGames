@@ -9,12 +9,13 @@ import DepthGauge, { Bubbles } from "./DepthGauge";
 import Scoreboard, { PLAYER_INK, playerName } from "./Scoreboard";
 import { Results } from "./Screens";
 import { descentFraction, formatDepth } from "./zones";
+import { hasPack, scoreLocally } from "./localScore";
 
 const METRES_PER_POINT = 10;
 
 export default function DeepDiveOnline({ onChangeMode }) {
   return (
-    <RoomConnect gameSlug="deep-dive">
+    <RoomConnect onBack={onChangeMode} gameSlug="deep-dive">
       {({ code, seat, state, dispatch }) => (
         <Inner code={code} seat={seat} state={state} dispatch={dispatch} onChangeMode={onChangeMode} />
       )}
@@ -30,6 +31,27 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
   const inputRef = useRef(null);
   const guessRef = useRef("");
   const sentRef = useRef(false);
+  // The room's prompts with their answer lists, for instant local checks.
+  const [packs, setPacks] = useState({});
+  const promptIds = state?.prompts?.map((p) => p.id).join(",") || "";
+
+  useEffect(() => {
+    if (!promptIds) return;
+    let cancelled = false;
+    fetch("/api/deep-dive/prompts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: promptIds.split(",") }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled) setPacks(Object.fromEntries((d.prompts || []).map((p) => [p.id, p])));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [promptIds]);
 
   const other = seat === "p1" ? "p2" : "p1";
   const index = state?.index ?? 0;
@@ -74,12 +96,16 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
     setBusy(true);
     try {
       if (!force) {
-        const res = await fetch("/api/deep-dive/answer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ promptId: state.prompts[index].id, answer, preview: true }),
-        });
-        const data = await res.json();
+        const pack = packs[state.prompts[index].id];
+        const data = hasPack(pack)
+          ? scoreLocally(pack, answer)
+          : await (
+              await fetch("/api/deep-dive/answer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ promptId: state.prompts[index].id, answer, preview: true }),
+              })
+            ).json();
         if (!data.valid) {
           setRejection({ text: answer, suggestion: data.suggestion || null });
           inputRef.current?.select();
@@ -121,7 +147,7 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
       className={`dd-shell pack-${state.pack || "general"}`}
       style={{
         "--dd-t": fraction.toFixed(3),
-        "--dd-fg": fraction > 0.35 ? "var(--stock-bright)" : "var(--ink)",
+        "--dd-fg": "var(--ink)",
       }}
     >
       <Bubbles />
@@ -143,8 +169,8 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
         <div className="dd-layout">
           <DepthGauge
             divers={[
-              { key: "p1", depth: state.scores.p1 * METRES_PER_POINT, ink: PLAYER_INK.p1, textInk: "var(--stock-bright)", label: "1" },
-              { key: "p2", depth: state.scores.p2 * METRES_PER_POINT, ink: PLAYER_INK.p2, textInk: "var(--stock-bright)", label: "2" },
+              { key: "p1", depth: state.scores.p1 * METRES_PER_POINT, ink: PLAYER_INK.p1, textInk: "var(--ink-dark)", label: "1" },
+              { key: "p2", depth: state.scores.p2 * METRES_PER_POINT, ink: PLAYER_INK.p2, textInk: "var(--ink-dark)", label: "2" },
             ]}
           />
 
@@ -294,9 +320,9 @@ function AnswerLine({ entry, who, ink }) {
           width: "2.1rem",
           height: "2.1rem",
           borderRadius: "50%",
-          border: "var(--border-w) solid var(--ink)",
+          border: "var(--border-w) solid var(--frame)",
           background: entry.valid ? ink : "var(--stock)",
-          color: entry.valid ? "var(--stock-bright)" : "var(--ink)",
+          color: entry.valid ? "var(--ink-dark)" : "var(--ink)",
           display: "grid",
           placeItems: "center",
           flexShrink: 0,

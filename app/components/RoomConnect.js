@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   IconArrowRight,
+  IconDice,
   IconCopy,
   IconSmartphone,
   IconUser,
@@ -10,6 +12,21 @@ import {
   IconX,
 } from "../icons";
 import { useRoom, createRoomRequest } from "../../lib/useRoom";
+
+function deviceId() {
+  try {
+    let id = window.localStorage.getItem("delgames:device");
+    if (!id || !/^[a-z0-9]{8,40}$/i.test(id)) {
+      const bytes = new Uint8Array(12);
+      window.crypto.getRandomValues(bytes);
+      id = Array.from(bytes, (b) => b.toString(36).padStart(2, "0")).join("").slice(0, 20);
+      window.localStorage.setItem("delgames:device", id);
+    }
+    return id;
+  } catch {
+    return "anon" + Math.random().toString(36).slice(2, 12);
+  }
+}
 
 function storageKey(gameSlug) {
   return `delgames:online:${gameSlug}`;
@@ -42,7 +59,7 @@ function saveSession(gameSlug, session) {
 // code, pick a seat, then hands off to `children` as a render-prop once
 // connected. Remembers the session in localStorage so a phone can refresh
 // without losing its seat.
-export default function RoomConnect({ gameSlug, children }) {
+export default function RoomConnect({ gameSlug, children, onBack }) {
   const [stage, setStage] = useState("loading"); // loading -> choice -> create-wait -> join-form -> seat-select -> connected
   const [code, setCode] = useState(null);
   const [seat, setSeat] = useState(null);
@@ -102,10 +119,33 @@ export default function RoomConnect({ gameSlug, children }) {
     }
   }
 
-  function chooseSeat(s) {
-    setSeat(s);
-    saveSession(gameSlug, { code, seat: s });
-    setStage("connected");
+  const [taken, setTaken] = useState(null); // seat someone else holds
+
+  async function chooseSeat(s, force = false) {
+    setBusy(true);
+    setLocalError("");
+    try {
+      const res = await fetch(`/api/rooms/${gameSlug}/${code}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "CLAIM_SEAT", seat: s, device: deviceId(), force }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        setTaken(s);
+        setLocalError(json.error || "That seat is taken.");
+        return;
+      }
+      if (!res.ok) throw new Error(json.error || "Couldn't take that seat.");
+      setTaken(null);
+      setSeat(s);
+      saveSession(gameSlug, { code, seat: s });
+      setStage("connected");
+    } catch (err) {
+      setLocalError(err.message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   function leaveRoom() {
@@ -119,33 +159,60 @@ export default function RoomConnect({ gameSlug, children }) {
 
   if (stage === "loading") return null;
 
+  // Before a room is joined there's no game screen yet, so give these steps
+  // the standard header and a way back to the mode list.
+  const shell = (content) => (
+    <>
+      <nav className="top-nav">
+        <Link href="/" className="brand">
+          <span className="brand-badge">
+            <IconDice size={20} strokeWidth={2.2} />
+          </span>
+          DelGames
+        </Link>
+        {onBack && (
+          <button className="pill" onClick={onBack} style={{ cursor: "pointer" }}>
+            <IconSmartphone size={13} strokeWidth={2.4} />
+            Change mode
+          </button>
+        )}
+      </nav>
+      <main className="page" style={{ maxWidth: 560 }}>
+        {content}
+      </main>
+    </>
+  );
+
   if (stage === "choice") {
-    return (
-      <div className="block" style={{ padding: "1.6rem", color: "var(--ink)", display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 800 }}>
+    return shell(
+      <div className="block room-card">
+        <div className="room-head">
           <IconWifi size={18} strokeWidth={2.4} />
-          Play on two phones
+          Two phones
         </div>
-        <p style={{ opacity: 0.75, fontSize: "0.9rem" }}>
-          One of you creates a room and shares the code; the other joins with
-          it. Each phone only ever shows what that seat is meant to see.
+        <p className="room-lead">
+          One of you creates a room and shares the code. Each phone only shows what that player is meant to see.
         </p>
         {localError && <ErrorBanner>{localError}</ErrorBanner>}
-        <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
-          <button className="block-btn blue" onClick={handleCreate} disabled={busy}>
-            Create a room
-          </button>
-        </div>
-        <form onSubmit={handleJoin} style={{ display: "flex", gap: "0.6rem" }}>
+        <button className="block-btn blue" onClick={handleCreate} disabled={busy}>
+          {busy ? "Creating…" : "Create a room"}
+          <IconArrowRight size={16} strokeWidth={2.4} />
+        </button>
+        <div className="room-or">or join one</div>
+        <form onSubmit={handleJoin} className="room-join">
           <input
-            className="block-input"
+            className="block-input room-code-input"
             value={joinInput}
-            onChange={(e) => setJoinInput(e.target.value.toUpperCase())}
-            placeholder="Have a code? Enter it"
+            onChange={(e) => setJoinInput(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+            placeholder="CODE"
             maxLength={6}
             autoComplete="off"
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
+            aria-label="Room code"
           />
-          <button type="submit" className="block-btn secondary" disabled={busy}>
+          <button type="submit" className="block-btn secondary" disabled={busy || joinInput.length < 4}>
             Join
           </button>
         </form>
@@ -154,28 +221,37 @@ export default function RoomConnect({ gameSlug, children }) {
   }
 
   if (stage === "seat-select") {
-    return (
-      <div className="block" style={{ padding: "1.6rem", color: "var(--ink)", display: "flex", flexDirection: "column", gap: "1.1rem", alignItems: "flex-start" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 800 }}>
+    const seats = room.data?.seats || {};
+    return shell(
+      <div className="block room-card">
+        <div className="room-head">
           <IconSmartphone size={18} strokeWidth={2.4} />
           Room code
         </div>
         <RoomCodeDisplay code={code} />
-        <p style={{ opacity: 0.75, fontSize: "0.9rem" }}>
-          Share that code with the other player, then each of you pick who you are:
-        </p>
-        <div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap" }}>
-          <button className="block-btn blue" onClick={() => chooseSeat("p1")}>
-            <IconUser size={16} strokeWidth={2.4} style={{ marginRight: "0.4rem", verticalAlign: "-3px" }} />
-            I'm Player 1
-          </button>
-          <button className="block-btn pink" onClick={() => chooseSeat("p2")}>
-            <IconUser size={16} strokeWidth={2.4} style={{ marginRight: "0.4rem", verticalAlign: "-3px" }} />
-            I'm Player 2
-          </button>
+        <p className="room-lead">Share the code, then each of you picks who you are.</p>
+        {localError && <ErrorBanner>{localError}</ErrorBanner>}
+        <div className="room-seats">
+          {["p1", "p2"].map((s) => (
+            <button
+              key={s}
+              className={`block-btn ${s === "p1" ? "blue" : "pink"}`}
+              onClick={() => chooseSeat(s)}
+              disabled={busy}
+            >
+              <IconUser size={16} strokeWidth={2.4} />
+              {s === "p1" ? "Player 1" : "Player 2"}
+              {seats[s] && <small className="room-taken">taken</small>}
+            </button>
+          ))}
         </div>
-        <button className="block-btn secondary" onClick={leaveRoom} style={{ fontSize: "0.85rem" }}>
-          <IconX size={14} strokeWidth={2.6} style={{ marginRight: "0.3rem", verticalAlign: "-2px" }} />
+        {taken && (
+          <button className="block-btn secondary" onClick={() => chooseSeat(taken, true)} disabled={busy}>
+            It&apos;s me on a new phone — take over {taken === "p1" ? "Player 1" : "Player 2"}
+          </button>
+        )}
+        <button className="block-btn secondary" onClick={leaveRoom}>
+          <IconX size={14} strokeWidth={2.6} />
           Back
         </button>
       </div>
@@ -184,9 +260,9 @@ export default function RoomConnect({ gameSlug, children }) {
 
   // connected
   if (!room.connected && !room.data) {
-    return (
-      <div className="block" style={{ padding: "1.6rem", color: "var(--ink)", display: "flex", flexDirection: "column", gap: "0.8rem" }}>
-        <p>Connecting to room {code}…</p>
+    return shell(
+      <div className="block room-card">
+        <p className="room-head">Connecting to room {code}…</p>
         {room.error && <ErrorBanner>{room.error}</ErrorBanner>}
         <button className="block-btn secondary" onClick={leaveRoom} style={{ alignSelf: "flex-start" }}>
           Leave
@@ -217,22 +293,17 @@ function RoomCodeDisplay({ code }) {
     }
   }
   return (
-    <button
-      onClick={copy}
-      className="pill"
-      style={{
-        background: "var(--yellow)",
-        fontSize: "1.6rem",
-        fontWeight: 800,
-        letterSpacing: "0.15em",
-        padding: "0.6rem 1.2rem",
-        border: "var(--border-w) solid var(--ink)",
-        cursor: "pointer",
-      }}
-    >
-      {code}
-      <IconCopy size={16} strokeWidth={2.4} />
-      {copied && <span style={{ fontSize: "0.7rem", fontWeight: 700 }}>Copied!</span>}
+    <button onClick={copy} className="room-code" aria-label={`Room code ${code}, tap to copy`}>
+      <span className="tile-row">
+        {code.split("").map((ch, i) => (
+          <span key={i} className="tile" style={{ "--i": i, background: "var(--ink-ochre)" }}>
+            {ch}
+          </span>
+        ))}
+      </span>
+      <span className="room-copy">
+        <IconCopy size={13} strokeWidth={2.4} /> {copied ? "Copied!" : "Tap to copy"}
+      </span>
     </button>
   );
 }
@@ -241,12 +312,12 @@ export function ErrorBanner({ children }) {
   return (
     <p
       style={{
-        color: "var(--ink)",
+        color: "var(--ink-dark)",
         background: "var(--yellow)",
         padding: "0.5rem 0.8rem",
-        borderRadius: 10,
+        borderRadius: 0,
         fontWeight: 700,
-        border: "var(--border-w) solid var(--ink)",
+        border: "var(--border-w) solid var(--frame)",
         fontSize: "0.85rem",
       }}
     >
@@ -269,8 +340,10 @@ export function WaitingBanner({ children }) {
         alignItems: "center",
       }}
     >
-      <IconWifi size={22} strokeWidth={2.2} />
-      <p style={{ fontWeight: 700 }}>{children}</p>
+      <span className="room-wait-icon">
+        <IconWifi size={22} strokeWidth={2.2} />
+      </span>
+      <p className="room-wait-text">{children}</p>
     </div>
   );
 }

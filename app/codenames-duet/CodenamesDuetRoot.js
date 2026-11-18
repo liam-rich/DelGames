@@ -22,13 +22,14 @@ export default function CodenamesDuetRoot() {
           </span>
           DelGames
         </Link>
-        <span className="pill" style={{ background: "var(--pink)" }}>
+        <span className="pill" style={{ background: "var(--pink)", color: "var(--ink-dark)" }}>
           <IconSpy size={14} strokeWidth={2.4} />
           Codenames Duet
         </span>
       </nav>
       <main className="page" style={{ maxWidth: 780 }}>
         <PlayModeSelect
+          accent="var(--ink-pink)"
           title="Codenames Duet"
           description="A shared 5x5 board with two private keys. Give clues, find your agents, and avoid the assassin — together."
           onChoose={setMode}

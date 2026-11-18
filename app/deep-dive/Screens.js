@@ -30,14 +30,14 @@ export function PackPicker({ value, onChange }) {
                 textAlign: "left",
                 cursor: "pointer",
                 font: "inherit",
-                border: "var(--border-w) solid var(--ink)",
+                border: "var(--border-w) solid var(--frame)",
                 borderRadius: "var(--radius)",
                 padding: "var(--s3)",
                 display: "grid",
                 gap: "0.15rem",
                 background: active ? pack.ink : "var(--stock)",
-                color: active ? "var(--stock-bright)" : "var(--ink)",
-                boxShadow: active ? "3px 3px 0 var(--ink)" : "none",
+                color: active ? "var(--ink-dark)" : "var(--ink)",
+                boxShadow: active ? "3px 3px 0 var(--shadow)" : "none",
               }}
             >
               <span style={{ fontFamily: "var(--font-display)", fontWeight: 800 }}>{pack.name}</span>
@@ -55,16 +55,7 @@ export function Intro({ onStart, busy, pack, onPack }) {
   return (
     <div style={{ display: "grid", gap: "1.25rem", maxWidth: 640, margin: "0 auto", paddingTop: "1.5rem" }}>
       <div style={{ textAlign: "center" }}>
-        <h1
-          style={{
-            fontSize: "clamp(2.6rem, 9vw, 4.2rem)",
-            letterSpacing: "-0.045em",
-            color: "var(--ink-blue)",
-            textShadow: "3px 3px 0 var(--ink-pink)",
-          }}
-        >
-          DEEP DIVE
-        </h1>
+        <h1 className="mode-title" style={{ "--accent": "var(--pack-ink)" }}>Deep Dive</h1>
         <p className="eyebrow" style={{ marginTop: "var(--s2)", opacity: 0.75 }}>
           Rarer answers sink deeper
         </p>
@@ -109,9 +100,9 @@ export function Reveal({ result, onNext, onAcceptSuggestion, busy, isLast }) {
             width: "2.6rem",
             height: "2.6rem",
             borderRadius: "50%",
-            border: "var(--border-w) solid var(--ink)",
+            border: "var(--border-w) solid var(--frame)",
             background: valid ? "var(--ink-blue)" : "var(--ink-pink)",
-            color: "var(--stock-bright)",
+            color: "var(--ink-dark)",
             flexShrink: 0,
           }}
         >

@@ -22,13 +22,14 @@ export default function CategoryScalesRoot() {
           </span>
           DelGames
         </Link>
-        <span className="pill" style={{ background: "var(--purple)", color: "var(--paper)" }}>
+        <span className="pill" style={{ background: "var(--purple)", color: "var(--ink-dark)" }}>
           <IconRadio size={14} strokeWidth={2.4} />
           Category Scales
         </span>
       </nav>
       <main className="page" style={{ maxWidth: 640 }}>
         <PlayModeSelect
+          accent="var(--ink-violet)"
           title="Category Scales"
           description="One of you secretly marks a scale; the other invents categories and guesses where the mark is."
           onChoose={setMode}

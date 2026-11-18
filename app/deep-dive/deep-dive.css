@@ -1,8 +1,6 @@
-/* Deep Dive — the dive, printed.
-   The ocean isn't a photograph here, it's ink coverage: the stock floods with
-   blue as --dd-t climbs (0 at the surface, 1 in the trench) while the cards
-   stay newsprint-white so they never stop being readable. --dd-fg is set from
-   JS and flips the shell-level text once the ground is too dark for ink. */
+/* Deep Dive — the dive, on the arcade cabinet.
+   The water darkens as --dd-t climbs (0 at the surface, 1 in the trench).
+   Each themed pack tints the water and the frames with its own neon. */
 
 .dd-shell {
   --dd-t: 0;
@@ -14,7 +12,7 @@
   position: relative;
   min-height: 100vh;
   color: var(--dd-fg);
-  background: var(--stock);
+  background: var(--wash);
   overflow: hidden;
   isolation: isolate;
   transition: color 700ms ease;
@@ -27,7 +25,7 @@
   inset: 0;
   z-index: -2;
   pointer-events: none;
-  background: linear-gradient(180deg, #2f6fc4 0%, #1f4fa8 45%, #0d2555 100%);
+  background: linear-gradient(180deg, #123a7a 0%, #0a2252 45%, #020815 100%);
   opacity: var(--dd-t);
   transition: opacity 900ms ease;
 }
@@ -54,7 +52,7 @@
   --dd-pattern: repeating-radial-gradient(
     circle at 22% 28%,
     transparent 0 22px,
-    rgba(35, 32, 28, 0.14) 22px 23.5px
+    rgba(170, 160, 255, 0.063) 22px 23.5px
   );
   --dd-pattern-size: 320px 320px;
   --dd-pattern-opacity: 0.75;
@@ -63,9 +61,9 @@
 .pack-wild {
   --pack-ink: var(--ink-ochre);
   --dd-pattern:
-    radial-gradient(ellipse 7px 3px at 12% 20%, rgba(35, 32, 28, 0.17) 50%, transparent 52%),
-    radial-gradient(ellipse 3px 7px at 62% 55%, rgba(35, 32, 28, 0.14) 50%, transparent 52%),
-    radial-gradient(ellipse 6px 3px at 84% 84%, rgba(35, 32, 28, 0.12) 50%, transparent 52%);
+    radial-gradient(ellipse 7px 3px at 12% 20%, rgba(170, 160, 255, 0.077) 50%, transparent 52%),
+    radial-gradient(ellipse 3px 7px at 62% 55%, rgba(170, 160, 255, 0.063) 50%, transparent 52%),
+    radial-gradient(ellipse 6px 3px at 84% 84%, rgba(170, 160, 255, 0.054) 50%, transparent 52%);
   --dd-pattern-size: 74px 74px;
   --dd-pattern-opacity: 0.85;
 }
@@ -73,8 +71,8 @@
 .pack-food {
   --pack-ink: var(--ink-pink);
   --dd-pattern:
-    repeating-linear-gradient(0deg, rgba(35, 32, 28, 0.09) 0 11px, transparent 11px 22px),
-    repeating-linear-gradient(90deg, rgba(35, 32, 28, 0.09) 0 11px, transparent 11px 22px);
+    repeating-linear-gradient(0deg, rgba(170, 160, 255, 0.041) 0 11px, transparent 11px 22px),
+    repeating-linear-gradient(90deg, rgba(170, 160, 255, 0.041) 0 11px, transparent 11px 22px);
   --dd-pattern-size: 22px 22px;
   --dd-pattern-opacity: 0.9;
 }
@@ -83,7 +81,7 @@
   --pack-ink: var(--ink-violet);
   --dd-pattern: repeating-conic-gradient(
     from 0deg at 50% -10%,
-    rgba(35, 32, 28, 0.11) 0deg 2.4deg,
+    rgba(170, 160, 255, 0.050) 0deg 2.4deg,
     transparent 2.4deg 9deg
   );
   --dd-pattern-size: 100% 100%;
@@ -93,18 +91,18 @@
 .pack-everyday {
   --pack-ink: var(--ink-rust);
   --dd-pattern:
-    repeating-linear-gradient(0deg, rgba(35, 32, 28, 0.11) 0 1px, transparent 1px 26px),
-    repeating-linear-gradient(90deg, rgba(35, 32, 28, 0.11) 0 1px, transparent 1px 26px);
+    repeating-linear-gradient(0deg, rgba(170, 160, 255, 0.050) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, rgba(170, 160, 255, 0.050) 0 1px, transparent 1px 26px);
   --dd-pattern-size: 26px 26px;
   --dd-pattern-opacity: 0.9;
 }
 
 /* The pack's ink carries through the water and the gauge. */
-.dd-shell::before { background: var(--pack-flood, linear-gradient(180deg, #2f6fc4 0%, #1f4fa8 45%, #0d2555 100%)); }
-.pack-wild { --pack-flood: linear-gradient(180deg, #3f7f5c 0%, #1f5a3f 45%, #0b2a1e 100%); }
-.pack-food { --pack-flood: linear-gradient(180deg, #d1607f 0%, #a13355 45%, #4a1226 100%); }
-.pack-culture { --pack-flood: linear-gradient(180deg, #8a5bb0 0%, #5c3480 45%, #24123a 100%); }
-.pack-everyday { --pack-flood: linear-gradient(180deg, #c07a4a 0%, #8a4a22 45%, #3a1d0c 100%); }
+.dd-shell::before { background: var(--pack-flood, linear-gradient(180deg, #123a7a 0%, #0a2252 45%, #020815 100%)); }
+.pack-wild { --pack-flood: linear-gradient(180deg, #0f5a3c 0%, #083a26 45%, #01100a 100%); }
+.pack-food { --pack-flood: linear-gradient(180deg, #6a1838 0%, #420c22 45%, #12030a 100%); }
+.pack-culture { --pack-flood: linear-gradient(180deg, #3e1a6e 0%, #260f48 45%, #0a0316 100%); }
+.pack-everyday { --pack-flood: linear-gradient(180deg, #5e2e10 0%, #3a1a08 45%, #100602 100%); }
 
 .dd-stage {
   position: relative;
@@ -113,78 +111,102 @@
   padding: var(--s5) var(--s5) var(--s7);
 }
 
-/* ---------- cards keep the house print style ---------- */
+/* ---------- cabinet pieces ---------- */
 
 .dd-panel {
-  border: var(--border-w) solid var(--ink);
-  border-radius: var(--radius);
-  background: var(--stock-bright);
+  position: relative;
+  margin: 4px;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
   color: var(--ink);
-  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--ink);
+  box-shadow:
+    0 -4px 0 0 color-mix(in srgb, var(--pack-ink) 45%, var(--frame)),
+    0 4px 0 0 color-mix(in srgb, var(--pack-ink) 45%, var(--frame)),
+    -4px 0 0 0 color-mix(in srgb, var(--pack-ink) 45%, var(--frame)),
+    4px 0 0 0 color-mix(in srgb, var(--pack-ink) 45%, var(--frame)),
+    0 12px 0 0 var(--shadow);
+  backdrop-filter: blur(2px);
 }
 
 .dd-btn {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  border: var(--border-w) solid var(--ink);
-  border-radius: var(--radius);
-  background: var(--ink-ochre);
-  color: var(--ink);
-  font-weight: 700;
-  font-size: 0.95rem;
-  padding: var(--s3) var(--s5);
+  --b: var(--ink-ochre);
+  --b-dk: #b37b00;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  margin: 4px;
+  padding: 0 1.2rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--b);
+  color: var(--ink-dark);
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--ink);
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  box-shadow:
+    0 -4px 0 0 var(--b-dk),
+    0 4px 0 0 var(--b-dk),
+    -4px 0 0 0 var(--b-dk),
+    4px 0 0 0 var(--b-dk),
+    inset 0 4px 0 0 rgba(255, 255, 255, 0.28),
+    inset 0 -5px 0 0 rgba(0, 0, 0, 0.2),
+    0 9px 0 0 var(--shadow);
+  transition: transform 0.06s steps(2), filter 0.12s;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.dd-btn:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--ink);
-}
-
-.dd-btn:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 var(--ink);
-}
+.dd-btn:hover:not(:disabled) { filter: brightness(1.1); }
+.dd-btn:active:not(:disabled) { transform: translateY(4px); }
 
 .dd-btn:disabled {
-  opacity: 0.4;
+  filter: grayscale(0.75) brightness(0.6);
   cursor: not-allowed;
   transform: none;
 }
 
 .dd-btn.ghost {
-  background: var(--stock-bright);
+  --b: var(--panel);
+  --b-dk: var(--frame);
+  color: var(--ink);
 }
 
 .dd-input {
   width: 100%;
   font-family: inherit;
-  border: var(--border-w) solid var(--ink);
-  border-radius: var(--radius);
-  background: var(--stock-bright);
+  border: 0;
+  border-radius: 0;
+  background: var(--well);
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1.1rem;
   padding: var(--s3) var(--s4);
   outline: none;
+  box-shadow: 0 0 0 3px var(--frame);
+  caret-color: var(--ink-blue);
+  -webkit-appearance: none;
 }
 
-.dd-input::placeholder { color: rgba(35, 32, 28, 0.4); }
-.dd-input:focus { box-shadow: 3px 3px 0 var(--ink-pink); }
+.dd-input::placeholder { color: var(--dim); }
+.dd-input:focus { box-shadow: 0 0 0 3px var(--ink-blue), 0 0 18px rgba(46, 230, 255, 0.25); }
 
 .dd-pill {
   display: inline-flex;
   align-items: center;
   gap: var(--s2);
-  border: 2px solid currentColor;
-  border-radius: 999px;
-  padding: 0.22rem 0.75rem;
-  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
-  font-size: 0.72rem;
+  padding: 0.45rem 0.65rem 0.4rem;
+  font-family: var(--pixel);
+  font-size: 0.55rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+  color: var(--ink-dark);
+  background: var(--pack-ink);
 }
 
 /* ---------- depth gauge: a printed ruler ---------- */
@@ -200,10 +222,10 @@
   position: sticky;
   top: var(--s5);
   height: min(72vh, 560px);
-  border: var(--border-w) solid var(--ink);
-  border-radius: var(--radius);
-  background: var(--stock-bright);
-  box-shadow: 4px 4px 0 var(--ink);
+  border: 0;
+  border-radius: 0;
+  background: var(--well);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pack-ink) 45%, var(--frame)), 0 10px 0 3px var(--shadow);
   overflow: hidden;
 }
 
@@ -211,7 +233,8 @@
 .dd-gauge-fill {
   position: absolute;
   inset: 0 0 auto 0;
-  background: var(--pack-flood, linear-gradient(180deg, #4d8ad6, #1f4fa8));
+  background: var(--pack-flood, linear-gradient(180deg, #2a6fd6, #0a2252));
+  box-shadow: inset 0 -3px 0 var(--pack-ink);
   transition: height 1100ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -228,9 +251,9 @@
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1.5px dashed rgba(35, 32, 28, 0.45);
-  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
-  font-size: 0.5rem;
+  border-top: 1.5px dashed rgba(170, 160, 255, 0.203);
+  font-family: var(--pixel);
+  font-size: 0.42rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 2px 5px 0;
@@ -242,9 +265,8 @@
 /* The ink rises past these graduations, so each one is knocked out of the
    plate rather than sitting on top of whatever colour happens to be behind. */
 .dd-zone span {
-  background: var(--stock-bright);
-  padding: 0 4px 1px;
-  border-radius: 2px;
+  background: var(--well);
+  padding: 1px 4px;
 }
 
 .dd-diver {
@@ -255,13 +277,13 @@
   margin-top: -0.95rem;
   display: grid;
   place-items: center;
-  font-family: var(--font-display), ui-sans-serif, sans-serif;
-  font-size: 0.7rem;
-  font-weight: 800;
-  border-radius: 50%;
-  border: var(--border-w) solid var(--ink);
+  font-family: var(--pixel);
+  font-size: 0.6rem;
+  color: var(--ink-dark);
+  border-radius: 0;
+  border: 0;
   background: var(--ink-ochre);
-  box-shadow: 2px 2px 0 var(--ink);
+  box-shadow: 0 0 0 3px var(--ink-dark), 0 0 14px rgba(255, 204, 51, 0.7);
   transition: top 1100ms cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 2;
 }
@@ -269,11 +291,13 @@
 /* ---------- timer ---------- */
 
 .dd-timer {
-  height: 0.8rem;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
+  height: 0.9rem;
+  padding: 2px;
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
-  background: var(--stock);
+  background: var(--well);
+  box-shadow: 0 0 0 2px var(--frame);
 }
 
 .dd-timer-fill {
@@ -282,8 +306,9 @@
   transition: width 250ms linear, background 300ms ease;
 }
 
+.dd-timer-fill { box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35); }
 .dd-timer-fill.warn { background: var(--ink-ochre); }
-.dd-timer-fill.danger { background: var(--ink-pink); }
+.dd-timer-fill.danger { background: var(--neon-red); animation: mode-blink 0.5s steps(2, start) infinite; }
 
 /* ---------- bubbles: printed outlines, not glass ---------- */
 
@@ -299,7 +324,7 @@
   position: absolute;
   bottom: -8%;
   border-radius: 50%;
-  border: 2px solid var(--dd-fg);
+  border: 2px solid rgba(160, 220, 255, 0.8);
   /* No bubbles above the waterline — they fade in as the ink floods. */
   opacity: calc(var(--dd-t) * 0.4);
   transition: opacity 900ms ease;

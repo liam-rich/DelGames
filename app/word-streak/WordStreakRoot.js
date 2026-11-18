@@ -22,13 +22,14 @@ export default function WordStreakRoot() {
           </span>
           DelGames
         </Link>
-        <span className="pill" style={{ background: "var(--teal)" }}>
+        <span className="pill" style={{ background: "var(--teal)", color: "var(--ink-dark)" }}>
           <IconLink size={14} strokeWidth={2.4} />
           Word Streak
         </span>
       </nav>
       <main className="page" style={{ maxWidth: 640 }}>
         <PlayModeSelect
+          accent="var(--ink-blue)"
           title="Word Streak"
           description="Both of you build a secret 5-word chain. Race to guess each other's words first."
           onChoose={setMode}

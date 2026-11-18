@@ -1,18 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import RoomConnect, { WaitingBanner } from "../components/RoomConnect";
 import { ChangeModeLink } from "../components/PlayModeSelect";
 import { IconUser, IconTarget, IconEye, IconLock } from "../icons";
 import { SetupPhase, ChainProgress, ResultsPhase } from "./WordStreakGame";
 
-const P1_THEME = { bg: "var(--blue)", text: "var(--paper)" };
-const P2_THEME = { bg: "var(--pink)", text: "var(--ink)" };
-const NEUTRAL_THEME = { bg: "var(--paper)", text: "var(--ink)" };
+const P1_THEME = { bg: "var(--wash-p1)", text: "var(--ink)" };
+const P2_THEME = { bg: "var(--wash-p2)", text: "var(--ink)" };
+const NEUTRAL_THEME = { bg: "var(--wash)", text: "var(--ink)" };
 
 export default function WordStreakOnline({ onChangeMode }) {
   return (
-    <RoomConnect gameSlug="word-streak">
+    <RoomConnect onBack={onChangeMode} gameSlug="word-streak">
       {({ code, seat, state, dispatch, error, leaveRoom }) => (
         <Inner code={code} seat={seat} state={state} dispatch={dispatch} error={error} leaveRoom={leaveRoom} onChangeMode={onChangeMode} />
       )}
@@ -24,6 +24,21 @@ function Inner({ code, seat, state, dispatch, error, leaveRoom, onChangeMode }) 
   const [words, setWords] = useState(["", "", "", "", ""]);
   const [setupError, setSetupError] = useState("");
   const [guessInput, setGuessInput] = useState("");
+  // One move in flight at a time: a double tap after a correct guess would
+  // otherwise be checked against the next word and pass the turn.
+  const sending = useRef(false);
+  const [busy, setBusy] = useState(false);
+  async function once(fn) {
+    if (sending.current) return;
+    sending.current = true;
+    setBusy(true);
+    try {
+      await fn();
+    } finally {
+      sending.current = false;
+      setBusy(false);
+    }
+  }
 
   if (!state) {
     return <WaitingBanner>Connecting…</WaitingBanner>;
@@ -54,20 +69,24 @@ function Inner({ code, seat, state, dispatch, error, leaveRoom, onChangeMode }) 
   async function submitGuess(e) {
     e.preventDefault();
     if (!guessInput.trim()) return;
-    try {
-      await dispatch({ type: "GUESS", seat, guess: guessInput });
-      setGuessInput("");
-    } catch {
-      // rejected (not your turn, etc.) — error surfaced via room error banner
-    }
+    await once(async () => {
+      try {
+        await dispatch({ type: "GUESS", seat, guess: guessInput });
+        setGuessInput("");
+      } catch {
+        // rejected (not your turn, etc.) — error surfaced via room error banner
+      }
+    });
   }
 
   async function revealLetter() {
-    try {
-      await dispatch({ type: "REVEAL", seat });
-    } catch {
-      // ignore — surfaced via error banner
-    }
+    await once(async () => {
+      try {
+        await dispatch({ type: "REVEAL", seat });
+      } catch {
+        // ignore — surfaced via error banner
+      }
+    });
   }
 
   async function playAgain() {
@@ -90,7 +109,7 @@ function Inner({ code, seat, state, dispatch, error, leaveRoom, onChangeMode }) 
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: theme.bg, margin: "-2.5rem -1.5rem -4rem", padding: "2.5rem 1.5rem 4rem", transition: "background 0.25s ease" }}>
+    <div style={{ minHeight: "100vh", background: theme.bg, padding: "calc(1.25rem + env(safe-area-inset-top)) 1rem 3rem", transition: "background 0.25s ease" }}>
       <div style={{ maxWidth: 640, margin: "0 auto", color: theme.text }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.2rem", flexWrap: "wrap", gap: "0.6rem" }}>
           <span className="pill" style={{ background: "var(--panel)", color: "var(--ink)" }}>
@@ -101,7 +120,7 @@ function Inner({ code, seat, state, dispatch, error, leaveRoom, onChangeMode }) 
         </div>
 
         {error && (
-          <p style={{ color: "var(--ink)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 10, fontWeight: 700, border: "var(--border-w) solid var(--ink)", marginBottom: "1rem" }}>
+          <p style={{ color: "var(--ink-dark)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 0, fontWeight: 700, border: "var(--border-w) solid var(--frame)", marginBottom: "1rem" }}>
             {error}
           </p>
         )}
@@ -124,6 +143,7 @@ function Inner({ code, seat, state, dispatch, error, leaveRoom, onChangeMode }) 
 
         {state.playing && !roundOver && (
           <OnlinePlay
+            busy={busy}
             seat={seat}
             state={state}
             guessInput={guessInput}
@@ -139,7 +159,7 @@ function Inner({ code, seat, state, dispatch, error, leaveRoom, onChangeMode }) 
   );
 }
 
-function OnlinePlay({ seat, state, guessInput, setGuessInput, onGuess, onReveal }) {
+function OnlinePlay({ seat, state, guessInput, setGuessInput, onGuess, onReveal, busy }) {
   const finishOrder = state.finishOrder || [];
   const soloMode = finishOrder.length === 1;
   const actingSeat = soloMode ? (finishOrder[0] === "p1" ? "p2" : "p1") : state.currentTurn;
@@ -170,7 +190,7 @@ function OnlinePlay({ seat, state, guessInput, setGuessInput, onGuess, onReveal 
 
   return (
     <section>
-      <div className="pill" style={{ background: "var(--panel)", color: "var(--ink)", marginBottom: "1.6rem", fontWeight: 800 }}>
+      <div className={`turn-banner ${actingSeat}`}>
         <IconTarget size={15} strokeWidth={2.4} />
         {bannerText}
       </div>
@@ -196,16 +216,20 @@ function OnlinePlay({ seat, state, guessInput, setGuessInput, onGuess, onReveal 
 
       {isMyTurn ? (
         <div className="block" style={{ padding: "2rem", textAlign: "center", display: "flex", flexDirection: "column", gap: "1.4rem", alignItems: "center", color: "var(--ink)" }}>
-          <div style={{ fontSize: "clamp(1.8rem, 6vw, 2.6rem)", fontWeight: 800, letterSpacing: "0.12em", minHeight: "3rem" }}>
-            {displayPattern}
+          <p className="eyebrow">Word {Math.min(activeTargetIndex + 1, 5)} of 5</p>
+          <div className="tile-row">
+            {displayPattern.split(" ").filter(Boolean).map((ch, i) => (
+              <span key={`${activeTargetIndex}-${i}`} className="tile" style={{ "--i": i }}>
+                {ch}
+              </span>
+            ))}
+            <span className="tile ghost">?</span>
           </div>
-
-          {state.lastEvent?.by === seat && state.lastEvent?.type === "wrong" && (
-            <p style={{ color: "var(--red)", fontWeight: 700 }}>Not quite{finishOrder.length === 0 ? " — turn passes." : ", try again."}</p>
-          )}
-          {state.lastEvent?.by === seat && state.lastEvent?.type === "correct" && (
-            <p style={{ color: "var(--green)", fontWeight: 800, fontSize: "1.2rem" }}>Got it!</p>
-          )}
+          <p className={`arcade-feedback ${state.lastEvent?.by === seat ? state.lastEvent.type : "idle"}`}>
+            {state.lastEvent?.by === seat && state.lastEvent?.type === "wrong" && `Not quite${finishOrder.length === 0 ? " — turn passes" : " — try again"}`}
+            {state.lastEvent?.by === seat && state.lastEvent?.type === "correct" && "Got it!"}
+            {!(state.lastEvent?.by === seat && ["wrong", "correct"].includes(state.lastEvent?.type)) && "\u00a0"}
+          </p>
 
           <form onSubmit={onGuess} style={{ width: "100%", display: "flex", gap: "0.6rem" }}>
             <input
@@ -214,14 +238,17 @@ function OnlinePlay({ seat, state, guessInput, setGuessInput, onGuess, onReveal 
               onChange={(e) => setGuessInput(e.target.value)}
               placeholder="Type your guess..."
               autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               autoFocus
             />
-            <button type="submit" className="block-btn blue" style={{ whiteSpace: "nowrap" }}>
+            <button type="submit" className="block-btn blue" style={{ whiteSpace: "nowrap" }} disabled={busy || !guessInput.trim()}>
               Guess
             </button>
           </form>
 
-          <button type="button" className="block-btn secondary" onClick={onReveal} disabled={!canReveal}>
+          <button type="button" className="block-btn secondary" onClick={onReveal} disabled={!canReveal || busy}>
             {canReveal ? (
               <>
                 <IconEye size={16} strokeWidth={2.4} style={{ marginRight: "0.4rem", verticalAlign: "-3px" }} />

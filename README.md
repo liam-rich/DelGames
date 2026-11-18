@@ -5,7 +5,7 @@ A small arcade of the puzzle games we keep coming back to — built with Next.js
 ## Games
 
 - **Word Streak** — our "Chain" game. Player 1 builds a 5-word chain where each word connects to the next. Player 2 sees the first word and the first letters of the rest, then reveals letters or guesses their way down the chain.
-- **Codenames Duet** — the two-player co-op version of Codenames.
+- **Codenames Duet** — the two-player co-op version of Codenames, following the real Duet rules: 9 agents and 3 assassins on each key in the real overlap pattern, bystanders that only count against the clue-giver, and sudden death when the timer runs out.
 - **Category Scales** — a reversed Wavelength: one of you secretly marks a scale, the other invents categories and guesses where the mark is.
 - **Deep Dive** — solo, pass-and-play or two phones. Seven prompts, 25 seconds each, name one thing. The rarer your answer, the deeper you sink. 109 prompts across six themed packs.
 
@@ -30,6 +30,10 @@ when the bank is built:
    written most-nameable first. That supplies the word-sense judgement a unigram
    corpus can't: frequency alone would rank `it` as the top school subject and
    `thing` as the top superhero.
+
+Each run's seven prompts are sent to the device with their answer lists, so
+answers score instantly rather than waiting on the network while the clock
+runs; committed answers are recorded to the live stats in the background.
 
 Points are Shannon surprisal — how many bits of information your answer carries —
 so a 1-in-1000 pick scores roughly four times an obvious one. Once the game is

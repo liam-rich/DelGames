@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   IconDice,
@@ -18,9 +18,9 @@ import {
 
 const WORD_COUNT = 5;
 
-const P1_THEME = { bg: "var(--blue)", text: "var(--paper)", name: "Player 1" };
-const P2_THEME = { bg: "var(--pink)", text: "var(--ink)", name: "Player 2" };
-const NEUTRAL_THEME = { bg: "var(--paper)", text: "var(--ink)", name: "" };
+const P1_THEME = { bg: "var(--wash-p1)", text: "var(--ink)", name: "Player 1" };
+const P2_THEME = { bg: "var(--wash-p2)", text: "var(--ink)", name: "Player 2" };
+const NEUTRAL_THEME = { bg: "var(--wash)", text: "var(--ink)", name: "" };
 
 function emptyWords() {
   return Array.from({ length: WORD_COUNT }, () => "");
@@ -47,6 +47,13 @@ export default function WordStreakGame() {
   const [guessInput, setGuessInput] = useState("");
   const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
   const [finishOrder, setFinishOrder] = useState([]); // e.g. ['p1'] then ['p1','p2']
+  // Set synchronously so two taps in the same instant can't both score.
+  const busy = useRef(false);
+  const settle = (fn, ms) =>
+    setTimeout(() => {
+      fn();
+      busy.current = false;
+    }, ms);
 
   function updateWord(setter, i, value) {
     const clean = value.replace(/[^a-zA-Z]/g, "").toLowerCase();
@@ -136,8 +143,12 @@ export default function WordStreakGame() {
 
   function submitGuess(e) {
     e.preventDefault();
-    const guess = guessInput.trim().toLowerCase();
-    if (!guess) return;
+    // Chains are stored letters-only, so compare guesses the same way. Ignore
+    // input while the last answer's feedback is still showing — a fast double
+    // tap would otherwise score twice or flip the turn back.
+    const guess = guessInput.replace(/[^a-zA-Z]/g, "").toLowerCase();
+    if (!guess || busy.current) return;
+    busy.current = true;
 
     const finisher = currentTurn;
     const setTargetIndex = currentTurn === "p1" ? setP1TargetIndex : setP2TargetIndex;
@@ -147,12 +158,12 @@ export default function WordStreakGame() {
       setGuessInput("");
       setFeedback("correct");
       if (activeTargetIndex === WORD_COUNT - 1) {
-        setTimeout(() => {
+        settle(() => {
           setFeedback(null);
           setFinishOrder((prev) => (prev.includes(finisher) ? prev : [...prev, finisher]));
         }, 600);
       } else {
-        setTimeout(() => {
+        settle(() => {
           setTargetIndex((i) => i + 1);
           setRevealed(1);
           setFeedback(null);
@@ -161,7 +172,7 @@ export default function WordStreakGame() {
     } else {
       setFeedback("wrong");
       setGuessInput("");
-      setTimeout(() => {
+      settle(() => {
         setFeedback(null);
         if (bothStillRacing) {
           setCurrentTurn((t) => (t === "p1" ? "p2" : "p1"));
@@ -172,14 +183,19 @@ export default function WordStreakGame() {
   }
 
   function revealLetter() {
-    if (!canReveal) return;
+    if (!canReveal || busy.current) return;
     const setRevealed = currentTurn === "p1" ? setP1Revealed : setP2Revealed;
     setRevealed((c) => Math.min(c + 1, currentWord.length));
-    setFeedback(null);
     if (bothStillRacing) {
-      setTimeout(() => {
+      busy.current = true;
+      setFeedback("reveal");
+      settle(() => {
         setCurrentTurn((t) => (t === "p1" ? "p2" : "p1"));
-      }, 400);
+        setFeedback(null);
+      }, 500);
+    } else {
+      busy.current = true;
+      settle(() => {}, 200);
     }
   }
 
@@ -298,8 +314,8 @@ export function SetupPhase({ playerLabel, PlayerIcon, words, updateWord, onSubmi
           style={{
             width: "2.6rem",
             height: "2.6rem",
-            borderRadius: "12px",
-            border: "var(--border-w) solid var(--ink)",
+            borderRadius: 0,
+            border: "var(--border-w) solid var(--frame)",
             background: "var(--panel)",
             color: "var(--ink)",
             display: "flex",
@@ -350,12 +366,12 @@ export function SetupPhase({ playerLabel, PlayerIcon, words, updateWord, onSubmi
         ))}
 
         {error && (
-          <p style={{ color: "var(--ink)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 10, fontWeight: 700, border: "var(--border-w) solid var(--ink)" }}>
+          <p style={{ color: "var(--ink-dark)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 0, fontWeight: 700, border: "var(--border-w) solid var(--frame)" }}>
             {error}
           </p>
         )}
 
-        <button type="submit" className="block-btn" style={{ marginTop: "0.6rem", background: "var(--panel)" }}>
+        <button type="submit" className="block-btn" style={{ marginTop: "0.6rem" }}>
           Lock it in
           <IconArrowRight size={16} strokeWidth={2.4} style={{ marginLeft: "0.5rem", verticalAlign: "-2px" }} />
         </button>
@@ -382,9 +398,10 @@ function HandoffPhase({ heading, body, buttonLabel, onReady }) {
         style={{
           width: "3.4rem",
           height: "3.4rem",
-          borderRadius: "14px",
-          border: "var(--border-w) solid var(--ink)",
+          borderRadius: 0,
+          border: "var(--border-w) solid var(--frame)",
           background: "var(--yellow)",
+          color: "var(--ink-dark)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -434,15 +451,7 @@ function PlayPhase({
 
   return (
     <section>
-      <div
-        className="pill"
-        style={{
-          background: "var(--panel)",
-          color: "var(--ink)",
-          marginBottom: "1.6rem",
-          fontWeight: 800,
-        }}
-      >
+      <div className={`turn-banner ${currentTurn}`}>
         <IconTarget size={15} strokeWidth={2.4} />
         {bannerText}
       </div>
@@ -481,25 +490,22 @@ function PlayPhase({
           color: "var(--ink)",
         }}
       >
-        <div
-          style={{
-            fontSize: "clamp(1.8rem, 6vw, 2.6rem)",
-            fontWeight: 800,
-            letterSpacing: "0.12em",
-            minHeight: "3rem",
-          }}
-        >
-          {displayPattern}
+        <p className="eyebrow">Word {Math.min((currentTurn === "p1" ? p1TargetIndex : p2TargetIndex) + 1, 5)} of 5</p>
+        <div className={`tile-row${feedback === "wrong" ? " is-wrong" : ""}${feedback === "correct" ? " is-right" : ""}`}>
+          {displayPattern.split(" ").filter(Boolean).map((ch, i) => (
+            <span key={`${i}-${ch}`} className="tile" style={{ "--i": i }}>
+              {ch}
+            </span>
+          ))}
+          <span className="tile ghost">?</span>
         </div>
 
-        {feedback === "wrong" && (
-          <p style={{ color: "var(--red)", fontWeight: 700 }}>
-            Not quite{finishOrder.length === 0 ? " — turn passes." : ", try again."}
-          </p>
-        )}
-        {feedback === "correct" && (
-          <p style={{ color: "var(--green)", fontWeight: 800, fontSize: "1.2rem" }}>Got it!</p>
-        )}
+        <p className={`arcade-feedback ${feedback || "idle"}`} aria-live="polite">
+          {feedback === "wrong" && `Not quite${finishOrder.length === 0 ? " — turn passes" : " — try again"}`}
+          {feedback === "correct" && "Got it!"}
+          {feedback === "reveal" && "Letter revealed — turn passes"}
+          {!feedback && "\u00a0"}
+        </p>
 
         <form onSubmit={onGuess} style={{ width: "100%", display: "flex", gap: "0.6rem" }}>
           <input
@@ -508,9 +514,12 @@ function PlayPhase({
             onChange={(e) => setGuessInput(e.target.value)}
             placeholder="Type your guess..."
             autoComplete="off"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             autoFocus
           />
-          <button type="submit" className="block-btn blue" style={{ whiteSpace: "nowrap" }}>
+          <button type="submit" className="block-btn blue" style={{ whiteSpace: "nowrap" }} disabled={!guessInput.trim() || Boolean(feedback)}>
             Guess
           </button>
         </form>
@@ -519,7 +528,7 @@ function PlayPhase({
           type="button"
           className="block-btn secondary"
           onClick={onReveal}
-          disabled={!canReveal}
+          disabled={!canReveal || Boolean(feedback)}
         >
           {canReveal ? (
             <>
@@ -539,56 +548,29 @@ function PlayPhase({
 }
 
 export function ChainProgress({ label, active, finished, words, targetIndex, revealed }) {
+  const who = label.endsWith("1") ? "p1" : "p2";
   return (
-    <div
-      className="pill"
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: "0.5rem",
-        background: active ? "var(--panel)" : "rgba(255,255,255,0.3)",
-        color: "var(--ink)",
-        boxShadow: active ? "3px 3px 0 var(--ink)" : "none",
-        padding: "0.6rem 0.9rem",
-        width: "100%",
-        justifyContent: "flex-start",
-      }}
-    >
-      <span style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontWeight: 800, marginRight: "0.3rem" }}>
-        <IconUser size={14} strokeWidth={2.4} />
+    <div className={`chain-row ${who}${active ? " active" : ""}${finished ? " finished" : ""}`}>
+      <span className="chain-label">
+        <IconUser size={13} strokeWidth={2.4} />
         {label}
-        {finished && <IconCheck size={14} strokeWidth={3} style={{ color: "var(--green)" }} />}
+        {finished && <IconCheck size={13} strokeWidth={3} />}
       </span>
-      {words.map((w, i) => {
-        const solved = i < targetIndex;
-        const isCurrent = i === targetIndex;
-        const given = i === 0;
-        let text;
-        if (solved || given) {
-          text = w.toUpperCase();
-        } else if (isCurrent) {
-          text = `${w.slice(0, revealed).toUpperCase()}…`;
-        } else {
-          text = `${w[0].toUpperCase()}…`;
-        }
-        return (
-          <span
-            key={i}
-            style={{
-              fontWeight: 700,
-              fontSize: "0.85rem",
-              padding: "0.15rem 0.5rem",
-              borderRadius: 8,
-              border: "2px solid var(--ink)",
-              background: solved || given ? "var(--yellow)" : "var(--panel)",
-              opacity: isCurrent ? 1 : 0.85,
-            }}
-          >
-            {text}
-          </span>
-        );
-      })}
+      <span className="chain-chips">
+        {words.map((w, i) => {
+          const solved = i < targetIndex || i === 0;
+          const isCurrent = i === targetIndex && !finished;
+          let text;
+          if (solved) text = w.toUpperCase();
+          else if (isCurrent) text = `${w.slice(0, revealed).toUpperCase()}…`;
+          else text = `${w[0].toUpperCase()}…`;
+          return (
+            <span key={i} className={`chip${solved ? " solved" : ""}${isCurrent ? " current" : ""}`}>
+              {text}
+            </span>
+          );
+        })}
+      </span>
     </div>
   );
 }
@@ -613,9 +595,10 @@ export function ResultsPhase({ finishOrder, wins, onReplay }) {
         style={{
           width: "3.6rem",
           height: "3.6rem",
-          borderRadius: "14px",
-          border: "var(--border-w) solid var(--ink)",
+          borderRadius: 0,
+          border: "var(--border-w) solid var(--frame)",
           background: "var(--yellow)",
+          color: "var(--ink-dark)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -630,7 +613,7 @@ export function ResultsPhase({ finishOrder, wins, onReplay }) {
 
       <div
         className="pill"
-        style={{ background: "var(--yellow)", color: "var(--ink)", fontWeight: 800 }}
+        style={{ background: "var(--yellow)", color: "var(--ink-dark)" }}
       >
         <IconTrophy size={14} strokeWidth={2.4} />
         Total wins — P1 {wins.p1} – {wins.p2} P2

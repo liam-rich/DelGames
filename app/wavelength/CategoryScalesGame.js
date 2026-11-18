@@ -15,9 +15,9 @@ import {
 
 const TOTAL_ROUNDS = 3;
 
-const P1_THEME = { bg: "var(--blue)", text: "var(--paper)" };
-const P2_THEME = { bg: "var(--pink)", text: "var(--ink)" };
-const NEUTRAL_THEME = { bg: "var(--paper)", text: "var(--ink)" };
+const P1_THEME = { bg: "var(--wash-p1)", text: "var(--ink)" };
+const P2_THEME = { bg: "var(--wash-p2)", text: "var(--ink)" };
+const NEUTRAL_THEME = { bg: "var(--wash)", text: "var(--ink)" };
 
 function scoreFor(diff) {
   if (diff <= 4) return { points: 5, label: "Perfect!" };
@@ -251,8 +251,8 @@ function BriefingPhase({ onStart }) {
           style={{
             width: "2.6rem",
             height: "2.6rem",
-            borderRadius: "12px",
-            border: "var(--border-w) solid var(--ink)",
+            borderRadius: 0,
+            border: "var(--border-w) solid var(--frame)",
             background: "var(--purple)",
             color: "var(--paper)",
             display: "flex",
@@ -303,8 +303,8 @@ function HandoffPhase({ heading, body, buttonLabel, onReady }) {
         style={{
           width: "3.4rem",
           height: "3.4rem",
-          borderRadius: "14px",
-          border: "var(--border-w) solid var(--ink)",
+          borderRadius: 0,
+          border: "var(--border-w) solid var(--frame)",
           background: "var(--yellow)",
           display: "flex",
           alignItems: "center",
@@ -407,7 +407,7 @@ export function EnterCategoryPhase({ guesser, roundIndex, leftLabel, setLeftLabe
           />
         </div>
         {error && (
-          <p style={{ color: "var(--ink)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 10, fontWeight: 700, border: "var(--border-w) solid var(--ink)" }}>
+          <p style={{ color: "var(--ink-dark)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 0, fontWeight: 700, border: "var(--border-w) solid var(--frame)" }}>
             {error}
           </p>
         )}
@@ -444,7 +444,7 @@ export function EnterResponsePhase({ placer, secretMark, leftLabel, rightLabel, 
                 height: "0.9rem",
                 transform: "translateY(-50%)",
                 borderRadius: "999px",
-                border: "var(--border-w) solid var(--ink)",
+                border: "var(--border-w) solid var(--frame)",
                 background: "linear-gradient(90deg, var(--blue), var(--pink))",
               }}
             />
@@ -458,7 +458,7 @@ export function EnterResponsePhase({ placer, secretMark, leftLabel, rightLabel, 
                 height: "1.6rem",
                 borderRadius: "50%",
                 background: "var(--yellow)",
-                border: "3px solid var(--ink)",
+                border: "3px solid var(--frame)",
               }}
             />
           </div>
@@ -479,7 +479,7 @@ export function EnterResponsePhase({ placer, secretMark, leftLabel, rightLabel, 
             autoFocus
           />
           {error && (
-            <p style={{ color: "var(--ink)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 10, fontWeight: 700, border: "var(--border-w) solid var(--ink)" }}>
+            <p style={{ color: "var(--ink-dark)", background: "var(--yellow)", padding: "0.5rem 0.8rem", borderRadius: 0, fontWeight: 700, border: "var(--border-w) solid var(--frame)" }}>
               {error}
             </p>
           )}
@@ -536,8 +536,8 @@ export function RoundHistory({ rounds, expanded }) {
               flexWrap: "wrap",
               gap: "0.4rem",
               padding: "0.6rem 0.8rem",
-              borderRadius: 10,
-              border: "2px solid var(--ink)",
+              borderRadius: 0,
+              border: "2px solid var(--frame)",
               background: "var(--panel)",
             }}
           >
@@ -565,8 +565,8 @@ export function RevealPhase({ placer, guesser, secretMark, guessMark, result, ro
           style={{
             width: "3rem",
             height: "3rem",
-            borderRadius: "14px",
-            border: "var(--border-w) solid var(--ink)",
+            borderRadius: 0,
+            border: "var(--border-w) solid var(--frame)",
             background: "var(--yellow)",
             display: "flex",
             alignItems: "center",
@@ -613,7 +613,7 @@ export function RevealPhase({ placer, guesser, secretMark, guessMark, result, ro
               height: "0.9rem",
               transform: "translateY(-50%)",
               borderRadius: "999px",
-              border: "var(--border-w) solid var(--ink)",
+              border: "var(--border-w) solid var(--frame)",
               background: "transparent",
             }}
           />
@@ -663,7 +663,7 @@ function MarkPin({ position, color, label, offsetDown }) {
           height: "1.3rem",
           borderRadius: "50%",
           background: color,
-          border: "3px solid var(--ink)",
+          border: "3px solid var(--frame)",
         }}
       />
       {offsetDown && (

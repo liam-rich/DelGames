@@ -47,7 +47,7 @@ export default function DeepDiveRoot() {
           </span>
           DelGames
         </Link>
-        <span className="pill">
+        <span className="pill" style={{ background: "#3f9bff", color: "var(--ink-dark)" }}>
           <IconWaves size={13} strokeWidth={2.4} />
           Deep Dive
         </span>
@@ -55,6 +55,7 @@ export default function DeepDiveRoot() {
 
       <main className="page" style={{ maxWidth: 720 }}>
         <PlayModeSelect
+          accent="#3f9bff"
           title="Deep Dive"
           description="Seven prompts, 25 seconds each. Name one thing — the rarer your answer, the deeper you sink."
           modes={MODES}

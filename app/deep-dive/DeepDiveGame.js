@@ -8,6 +8,7 @@ import DepthGauge, { Bubbles } from "./DepthGauge";
 import Scoreboard, { PLAYER_INK, playerName } from "./Scoreboard";
 import { Intro, Reveal, Results } from "./Screens";
 import { descentFraction, formatDepth } from "./zones";
+import { hasPack, scoreLocally, recordInBackground } from "./localScore";
 
 const METRES_PER_POINT = 10;
 
@@ -74,8 +75,12 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
     }
   }, [twoPlayer, pack]);
 
+  // Scored on the device from the run's prompt pack; the server is only a
+  // fallback (e.g. a run started before packs existed).
   const score = useCallback(
     async (promptId, answer) => {
+      const prompt = prompts.find((p) => p.id === promptId);
+      if (hasPack(prompt)) return scoreLocally(prompt, answer);
       const res = await fetch("/api/deep-dive/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,7 +89,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
       if (!res.ok) throw new Error("Could not score that answer.");
       return res.json();
     },
-    []
+    [prompts]
   );
 
   // A word that isn't in the bank doesn't cost the prompt — only the seconds
@@ -106,6 +111,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
         }
 
         sentRef.current = true;
+        if (data.valid && hasPack(prompt)) recordInBackground(prompt.id, answer);
         const entry = { ...data, promptId: prompt.id, promptText: prompt.text, given: answer };
         setResults((prev) => ({ ...prev, [seat]: [...prev[seat], entry] }));
         setGuess("");
@@ -157,6 +163,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
       const list = results[which];
       const current = list[list.length - 1];
       const data = await score(current.promptId, key);
+      if (data.valid && hasPack(prompts.find((p) => p.id === current.promptId))) recordInBackground(current.promptId, key);
       const entry = { ...data, promptId: current.promptId, promptText: current.promptText, given: key };
       setResults((prev) => ({ ...prev, [which]: [...prev[which].slice(0, -1), entry] }));
     } catch (err) {
@@ -185,7 +192,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
       className={`dd-shell pack-${pack}`}
       style={{
         "--dd-t": fraction.toFixed(3),
-        "--dd-fg": fraction > 0.35 ? "var(--stock-bright)" : "var(--ink)",
+        "--dd-fg": "var(--ink)",
       }}
     >
       <Bubbles />
@@ -219,7 +226,7 @@ export default function DeepDiveGame({ mode = "solo", onChangeMode }) {
                 key: s,
                 depth: scores[s] * METRES_PER_POINT,
                 ink: twoPlayer ? PLAYER_INK[s] : "var(--ink-ochre)",
-                textInk: twoPlayer ? "var(--stock-bright)" : "var(--ink)",
+                textInk: "var(--ink-dark)",
                 label: twoPlayer ? String(i + 1) : "",
               }))}
             />
@@ -383,9 +390,9 @@ function Handoff({ seat, onReady }) {
           width: "3.4rem",
           height: "3.4rem",
           borderRadius: "50%",
-          border: "var(--border-w) solid var(--ink)",
+          border: "var(--border-w) solid var(--frame)",
           background: PLAYER_INK[seat],
-          color: "var(--stock-bright)",
+          color: "var(--ink-dark)",
           display: "grid",
           placeItems: "center",
         }}

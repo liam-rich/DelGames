@@ -14,13 +14,13 @@ import {
 } from "./CategoryScalesGame";
 import { TOTAL_ROUNDS } from "../../lib/engines/categoryScales";
 
-const P1_THEME = { bg: "var(--blue)", text: "var(--paper)" };
-const P2_THEME = { bg: "var(--pink)", text: "var(--ink)" };
-const NEUTRAL_THEME = { bg: "var(--paper)", text: "var(--ink)" };
+const P1_THEME = { bg: "var(--wash-p1)", text: "var(--ink)" };
+const P2_THEME = { bg: "var(--wash-p2)", text: "var(--ink)" };
+const NEUTRAL_THEME = { bg: "var(--wash)", text: "var(--ink)" };
 
 export default function CategoryScalesOnline({ onChangeMode }) {
   return (
-    <RoomConnect gameSlug="wavelength">
+    <RoomConnect onBack={onChangeMode} gameSlug="wavelength">
       {({ code, seat, state, dispatch, error, leaveRoom }) => (
         <Inner code={code} seat={seat} state={state} dispatch={dispatch} error={error} leaveRoom={leaveRoom} onChangeMode={onChangeMode} />
       )}
@@ -101,7 +101,7 @@ function Inner({ code, seat, state, dispatch, onChangeMode }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: theme.bg, margin: "-2.5rem -1.5rem -4rem", padding: "2.5rem 1.5rem 4rem", transition: "background 0.25s ease" }}>
+    <div style={{ minHeight: "100vh", background: theme.bg, padding: "calc(1.25rem + env(safe-area-inset-top)) 1rem 3rem", transition: "background 0.25s ease" }}>
       <div style={{ maxWidth: 640, margin: "0 auto", color: theme.text }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.2rem", flexWrap: "wrap", gap: "0.6rem" }}>
           <span className="pill" style={{ background: "var(--panel)", color: "var(--ink)" }}>

@@ -1,4 +1,5 @@
 import { Bricolage_Grotesque, Instrument_Sans, DM_Mono } from "next/font/google";
+import { pixel } from "./fonts";
 import "./globals.css";
 
 // Self-hosted at build time by next/font — no CDN request, no silent fallback.
@@ -24,12 +25,12 @@ const mono = DM_Mono({
 
 export const metadata = {
   title: "DelGames",
-  description: "A cozy little arcade of puzzle games for two.",
+  description: "An arcade of word, trivia and party games.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable} ${pixel.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getEngine } from "../../../../../lib/engines";
-import { getRoom, updateRoom } from "../../../../../lib/rooms";
+import { getRoom, updateRoom, claimSeat, publicRoom } from "../../../../../lib/rooms";
 import { kvConfigured } from "../../../../../lib/kv";
 
 export async function GET(request, { params }) {
@@ -23,7 +23,7 @@ export async function GET(request, { params }) {
   if (!room) {
     return NextResponse.json({ error: "Room not found." }, { status: 404 });
   }
-  return NextResponse.json({ code: code.toUpperCase(), ...room });
+  return NextResponse.json(publicRoom(code, room));
 }
 
 export async function POST(request, { params }) {
@@ -51,6 +51,9 @@ export async function POST(request, { params }) {
   }
 
   try {
+    if (action?.type === "CLAIM_SEAT") {
+      return NextResponse.json(await claimSeat(gameSlug, code, action.seat, action.device, Boolean(action.force)));
+    }
     const room = await updateRoom(gameSlug, code, (state) => engine.applyAction(state, action));
     return NextResponse.json(room);
   } catch (err) {

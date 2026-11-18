@@ -21,60 +21,42 @@ export const DEFAULT_MODES = [
   },
 ];
 
-export default function PlayModeSelect({ title, description, onChoose, modes = DEFAULT_MODES }) {
+export default function PlayModeSelect({ title, description, onChoose, modes = DEFAULT_MODES, accent = "var(--ink-blue)" }) {
   return (
-    <section
-      className="block"
-      style={{ padding: "2rem", color: "var(--ink)", display: "flex", flexDirection: "column", gap: "1.3rem" }}
-    >
-      <div>
-        <h1 style={{ fontSize: "1.7rem", marginBottom: "0.4rem" }}>{title}</h1>
-        {description && <p style={{ opacity: 0.75, lineHeight: 1.5 }}>{description}</p>}
-      </div>
+    <section className="mode-select" style={{ "--accent": accent }}>
+      <header className="mode-hero">
+        <h1 className="mode-title">{title}</h1>
+        {description && <p className="mode-desc">{description}</p>}
+      </header>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
+      <p className="mode-prompt">
+        <span className="mode-blink">▶</span> Choose a mode
+      </p>
+
+      <div className="mode-grid">
         {/* `key` is pulled out of the spread — React rejects it being passed
             through props rather than set directly on the element. */}
-        {modes.map(({ key, ...rest }) => (
-          <ModeCard key={key} {...rest} onClick={() => onChoose(key)} />
+        {modes.map(({ key, ...rest }, i) => (
+          <ModeCard key={key} index={i} {...rest} onClick={() => onChoose(key)} />
         ))}
       </div>
     </section>
   );
 }
 
-function ModeCard({ Icon, title, body, color, onClick }) {
+function ModeCard({ Icon, title, body, color, onClick, index }) {
   return (
-    <button
-      onClick={onClick}
-      className="block"
-      style={{
-        padding: "1.4rem",
-        textAlign: "left",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.7rem",
-        background: "var(--panel)",
-        color: "var(--ink)",
-      }}
-    >
-      <span
-        style={{
-          width: "2.6rem",
-          height: "2.6rem",
-          borderRadius: "12px",
-          border: "var(--border-w) solid var(--ink)",
-          background: color,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Icon size={20} strokeWidth={2.2} />
+    <button onClick={onClick} className="mode-tile" style={{ "--c": color, "--i": index }}>
+      <span className="mode-tile-icon">
+        <Icon size={22} strokeWidth={2.4} />
       </span>
-      <span style={{ fontWeight: 800, fontSize: "1.05rem" }}>{title}</span>
-      <span style={{ opacity: 0.7, fontSize: "0.85rem", lineHeight: 1.4 }}>{body}</span>
+      <span className="mode-tile-text">
+        <span className="mode-tile-title">{title}</span>
+        <span className="mode-tile-body">{body}</span>
+      </span>
+      <span className="mode-tile-go" aria-hidden>
+        ▶
+      </span>
     </button>
   );
 }
@@ -86,7 +68,7 @@ export function ChangeModeLink({ onClick, label = "Change mode" }) {
     <button
       onClick={onClick}
       className="pill"
-      style={{ background: "var(--panel)", color: "var(--ink)", cursor: "pointer", border: "var(--border-w) solid var(--ink)" }}
+      style={{ cursor: "pointer" }}
     >
       <IconSmartphone size={13} strokeWidth={2.4} />
       {label}
